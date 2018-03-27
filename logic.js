@@ -1,6 +1,7 @@
 //TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
 var do_shuffles = true;
 var visible_ability_decks = [];
+var visible_cards = [];
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
 
@@ -455,6 +456,10 @@ function draw_ability_card(deck) {
             if (visible_deck.class == deck.class) {
                 visible_deck.draw_top_card();
                 card = flip_up_top_card(visible_deck);
+                visible_cards[deck.deckid] = card;
+
+                div = document.getElementById("switch-" + deck.deckid + "-initiative");
+                div.innerText = " (" + card.initiative + ")";
             }
         });
     }
