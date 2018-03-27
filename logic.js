@@ -791,6 +791,11 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         deck.discard_deck();
     });
 
+    visible_ability_decks.forEach(function (deck) {
+        var deckid = deck.get_real_name().replace(/\s+/g, '');
+        add_deck_to_list(deck, deckid);
+    })
+
     decks_to_add.forEach(function (deck) {
         var deckid = deck.get_real_name().replace(/\s+/g, '');
         var deck_space = document.createElement("div");
@@ -837,27 +842,33 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         }
         visible_ability_decks.push(deck);
         
-        var currentdeckslist = document.getElementById("currentdeckslist");        
-        var list_item = document.createElement("li");
-        list_item.id = "currentdeck";
-        list_item.className = "currentdeck";
-        currentdeckslist.appendChild(list_item);
-        var label = document.createElement("a");
-        label.id = "switch-" + deckid;
-        label.href = "#switch-" + deckid
-        label.innerText = deck.get_real_name();
-        var initiative = document.createElement("div");
-        initiative.id = label.id + "-initiative";
-        label.appendChild(initiative);
-        label.addEventListener("click", function(e){
-            var d = document.getElementById(this.id.replace("switch-",""));
-            d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
-        }, false)
-        list_item.appendChild(label);
+        add_deck_to_list(deck, deckid);
     });
 
     // Rescale card text if necessary
     refresh_ui();
+}
+
+function add_deck_to_list(deck, deckid) {
+    var currentdeckslist = document.getElementById("currentdeckslist");
+    var list_item = document.getElementById("currentdeck");
+    var list_item = document.createElement("li");
+    list_item.id = "currentdeck";
+    list_item.className = "currentdeck";
+    currentdeckslist.appendChild(list_item);
+    var label = document.createElement("a");
+    label.id = "switch-" + deckid;
+    label.href = "#switch-" + deckid
+    label.innerText = deck.get_real_name();
+    var initiative = document.createElement("span");
+    initiative.id = label.id + "-initiative";
+    initiative.innerText = " (15)";
+    label.appendChild(initiative);
+    label.addEventListener("click", function(e){
+        var d = document.getElementById(this.id.replace("switch-",""));
+        d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
+    }, false)
+    list_item.appendChild(label);
 }
 
 function init_modifier_deck() {
