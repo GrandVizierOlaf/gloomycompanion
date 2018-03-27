@@ -792,12 +792,13 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     });
 
     visible_ability_decks.forEach(function (deck) {
-        var deckid = deck.get_real_name().replace(/\s+/g, '');
-        add_deck_to_list(deck, deckid);
+        deck.deckid = deck.get_real_name().replace(/\s+/g, '');
+        add_deck_to_list(deck);
     })
 
     decks_to_add.forEach(function (deck) {
         var deckid = deck.get_real_name().replace(/\s+/g, '');
+        deck.deckid = deckid;
         var deck_space = document.createElement("div");
         deck_space.id = deckid;
         deck_space.addEventListener('contextmenu', function(e) {            
@@ -849,7 +850,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     refresh_ui();
 }
 
-function add_deck_to_list(deck, deckid) {
+function add_deck_to_list(deck) {
     var currentdeckslist = document.getElementById("currentdeckslist");
     var list_item = document.getElementById("currentdeck");
     var list_item = document.createElement("li");
@@ -857,12 +858,12 @@ function add_deck_to_list(deck, deckid) {
     list_item.className = "currentdeck";
     currentdeckslist.appendChild(list_item);
     var label = document.createElement("a");
-    label.id = "switch-" + deckid;
-    label.href = "#switch-" + deckid
+    label.id = "switch-" + deck.deckid;
+    label.href = "#switch-" + deck.deckid;
     label.innerText = deck.get_real_name();
     var initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
-    initiative.innerText = " (15)";
+    initiative.innerText = " (??)";
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
