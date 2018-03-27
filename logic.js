@@ -1,4 +1,4 @@
-//TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
+//TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
 var do_shuffles = true;
 var visible_ability_decks = [];
 var modifier_deck = null;
@@ -93,7 +93,6 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
 		healthElite_span.innerText = "HP " + health[1];
 		card.appendChild(healthElite_span);
 	}
-	
 	
     var initiative_span = document.createElement("span");
     initiative_span.className = "initiative";
@@ -423,6 +422,7 @@ function flip_up_top_card(deck) {
     var card = deck.draw_pile.shift(card);
     send_to_discard(card, pull_animation = true);
     deck.discard.unshift(card);
+    return card;
 }
 
 function send_to_discard(card, pull_animation) {
@@ -438,16 +438,23 @@ function send_to_discard(card, pull_animation) {
     card.ui.addClass("discard");
 }
 
+function draw_all_visible_ability_cards() {
+    visible_ability_decks.forEach(function (visible_deck) {
+        draw_ability_card(visible_deck);
+    });
+}
+
 function draw_ability_card(deck) {
 
     if (deck.must_reshuffle()) {
         reshuffle(deck, true);
+        draw_ability_card(deck);
     }
     else {
         visible_ability_decks.forEach(function (visible_deck) {
             if (visible_deck.class == deck.class) {
                 visible_deck.draw_top_card();
-                flip_up_top_card(visible_deck);
+                card = flip_up_top_card(visible_deck);
             }
         });
     }
@@ -832,12 +839,16 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         
         var currentdeckslist = document.getElementById("currentdeckslist");        
         var list_item = document.createElement("li");
+        list_item.id = "currentdeck";
         list_item.className = "currentdeck";
         currentdeckslist.appendChild(list_item);
         var label = document.createElement("a");
         label.id = "switch-" + deckid;
         label.href = "#switch-" + deckid
         label.innerText = deck.get_real_name();
+        var initiative = document.createElement("div");
+        initiative.id = label.id + "-initiative";
+        label.appendChild(initiative);
         label.addEventListener("click", function(e){
             var d = document.getElementById(this.id.replace("switch-",""));
             d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
