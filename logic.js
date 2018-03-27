@@ -1,7 +1,10 @@
-//TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
+//TODO Adding an extra Guard deck will reshuffle the first one, 
+// End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, 
+// shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
 var do_shuffles = true;
+var all_ability_decks = [];
 var visible_ability_decks = [];
-var visible_cards = [];
+var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
 
@@ -873,6 +876,9 @@ function add_deck_to_list(deck) {
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
         d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
+        visible_ability_decks = visible_ability_decks.filter(function(visible_deck) {
+            return visible_deck.name !== this.name;
+        });
     }, false)
     list_item.appendChild(label);
 }
