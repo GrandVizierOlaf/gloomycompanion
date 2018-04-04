@@ -580,6 +580,5 @@ img[src="images/shuffle.svg"]
 }
 
 .hoveredswitch {
-  box-shadow: 0 0 10px rgba(81, 203, 238, 1);
-  border: 10px solid rgba(81, 203, 238, 1);
+  box-shadow: 2px 2px 15px 15px rgba(81, 203, 238, 1);
 }

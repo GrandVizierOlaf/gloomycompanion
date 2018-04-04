@@ -903,8 +903,10 @@ function add_deck_to_switch_list(deck) {
         var d = document.getElementById(this.id.replace("switch-",""));
         if (d.classList.contains("hiddendeck")) {
             visible_ability_decks.push(deck);
+            list_item.style.setProperty("text-decoration", "");
         } else {
             visible_ability_decks.splice(visible_ability_decks.indexOf(deck), 1);
+            list_item.style.setProperty("text-decoration", "line-through");
         }
         d.classList.toggle("hiddendeck");
     }, false)
