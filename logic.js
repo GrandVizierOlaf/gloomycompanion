@@ -4,7 +4,7 @@
 var do_shuffles = true;
 var all_ability_decks = [];
 var visible_ability_decks = [];
-var visible_cards = {};
+var visible_cards = [];
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
 
@@ -442,6 +442,15 @@ function send_to_discard(card, pull_animation) {
     card.ui.addClass("discard");
 }
 
+function compare_initiatives(card_a, card_b) {
+  // TODO: Add player logic
+  if (card_a.initiative < card_b.initiative)
+    return -1;
+  if (card_a.initiative > card_b.initiative)
+    return 1;
+  return 0;
+}
+
 function draw_all_visible_ability_cards() {
     visible_ability_decks.forEach(function (visible_deck) {
         draw_ability_card(visible_deck);
@@ -459,7 +468,9 @@ function draw_ability_card(deck) {
             if (visible_deck.class == deck.class) {
                 visible_deck.draw_top_card();
                 card = flip_up_top_card(visible_deck);
-                visible_cards[deck.deckid] = card;
+
+                // Find the existing visible_card for this deck and remove it
+                visible_cards.push(card);
 
                 div = document.getElementById("switch-" + deck.deckid + "-initiative");
                 div.innerText = " (" + card.initiative + ")";
@@ -875,10 +886,10 @@ function add_deck_to_list(deck) {
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
-        d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
+        d.classList.toggle("hiddendeck");
         visible_ability_decks = visible_ability_decks.filter(function(visible_deck) {
-            return visible_deck.name !== this.name;
-        });
+            return visible_deck.deckid !== this.id.replace("switch-","");
+        }, this);
     }, false)
     list_item.appendChild(label);
 }
