@@ -827,7 +827,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
 
     visible_ability_decks.forEach(function (deck) {
         deck.deckid = deck.get_real_name().replace(/\s+/g, '');
-        add_deck_to_list(deck);
+        add_deck_to_switch_list(deck);
     })
 
     decks_to_add.forEach(function (deck) {
