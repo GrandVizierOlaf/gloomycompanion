@@ -564,3 +564,22 @@ img[src="images/shuffle.svg"]
     -webkit-transform:          rotateY(180deg);
     transform:                  rotateY(180deg);
 }
+
+@keyframes pulse {
+    0% {
+     transform: scale(1, 1);
+    }
+
+    50% {
+     transform: scale(1.02, 1.02);
+    }
+
+    100% {
+    transform: scale(1, 1);
+    }
+}
+
+.hoveredswitch {
+  box-shadow: 0 0 10px rgba(81, 203, 238, 1);
+  border: 10px solid rgba(81, 203, 238, 1);
+}

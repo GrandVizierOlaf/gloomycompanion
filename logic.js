@@ -915,12 +915,12 @@ function add_deck_to_list(deck) {
             return visible_deck.deckid !== this.id.replace("switch-","");
         }, this);
     }, false)
-    label.addEventListener("mouseenter", function(e){
-        var d = document.getElementById(this.id.replace("switch-",""));
+    list_item.addEventListener("mouseenter", function(e){
+        var d = document.getElementById(this.firstElementChild.id.replace("switch-",""));
         d.classList.add("hoveredswitch");
     }, false);
-    label.addEventListener("mouseout", function(e){
-        var d = document.getElementById(this.id.replace("switch-",""));
+    list_item.addEventListener("mouseleave", function(e){
+        var d = document.getElementById(this.firstElementChild.id.replace("switch-",""));
         d.classList.remove("hoveredswitch");
     }, false);
     list_item.appendChild(label);
