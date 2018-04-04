@@ -20,15 +20,6 @@ var EVENT_NAMES = {
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
 
-function compare_initiatives(card_a, card_b) {
-  // TODO: Add player logic
-  if (card_a.initiative < card_b.initiative)
-    return -1;
-  if (card_a.initiative > card_b.initiative)
-    return 1;
-  return 0;
-}
-
 function reorder_switches() {
     var current_decks = document.getElementById("currentdeckslist");
     var items = current_decks.childNodes;
@@ -886,14 +877,14 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         }
         visible_ability_decks.push(deck);
         
-        add_deck_to_list(deck, deckid);
+        add_deck_to_switch_list(deck, deckid);
     });
 
     // Rescale card text if necessary
     refresh_ui();
 }
 
-function add_deck_to_list(deck) {
+function add_deck_to_switch_list(deck) {
     var currentdeckslist = document.getElementById("currentdeckslist");
     var list_item = document.getElementById("currentdeck");
     var list_item = document.createElement("li");
@@ -910,10 +901,12 @@ function add_deck_to_list(deck) {
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
+        if (d.classList.contains("hiddendeck")) {
+            visible_ability_decks.push(deck);
+        } else {
+            visible_ability_decks.splice(visible_ability_decks.indexOf(deck), 1);
+        }
         d.classList.toggle("hiddendeck");
-        visible_ability_decks = visible_ability_decks.filter(function(visible_deck) {
-            return visible_deck.deckid !== this.id.replace("switch-","");
-        }, this);
     }, false)
     list_item.addEventListener("mouseenter", function(e){
         var d = document.getElementById(this.firstElementChild.id.replace("switch-",""));
