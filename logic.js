@@ -1,6 +1,10 @@
-//TODO Adding an extra Guard deck will reshuffle the first one, End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, shield and retaliate only when shown (apparently, attribtues are active at the beginning of the turn, and active after initiative)
+//TODO Adding an extra Guard deck will reshuffle the first one, 
+// End of round with multiple Archers, resize text, worth to show common and elite_only attributes?, 
+// shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
 var do_shuffles = true;
+var all_ability_decks = [];
 var visible_ability_decks = [];
+var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
 
@@ -93,7 +97,6 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
 		healthElite_span.innerText = "HP " + health[1];
 		card.appendChild(healthElite_span);
 	}
-	
 	
     var initiative_span = document.createElement("span");
     initiative_span.className = "initiative";
@@ -423,6 +426,7 @@ function flip_up_top_card(deck) {
     var card = deck.draw_pile.shift(card);
     send_to_discard(card, pull_animation = true);
     deck.discard.unshift(card);
+    return card;
 }
 
 function send_to_discard(card, pull_animation) {
@@ -438,16 +442,27 @@ function send_to_discard(card, pull_animation) {
     card.ui.addClass("discard");
 }
 
+function draw_all_visible_ability_cards() {
+    visible_ability_decks.forEach(function (visible_deck) {
+        draw_ability_card(visible_deck);
+    });
+}
+
 function draw_ability_card(deck) {
 
     if (deck.must_reshuffle()) {
         reshuffle(deck, true);
+        draw_ability_card(deck);
     }
     else {
         visible_ability_decks.forEach(function (visible_deck) {
             if (visible_deck.class == deck.class) {
                 visible_deck.draw_top_card();
-                flip_up_top_card(visible_deck);
+                card = flip_up_top_card(visible_deck);
+                visible_cards[deck.deckid] = card;
+
+                div = document.getElementById("switch-" + deck.deckid + "-initiative");
+                div.innerText = " (" + card.initiative + ")";
             }
         });
     }
@@ -533,7 +548,7 @@ function double_draw(deck) {
     deck.advantage_to_clean = true;
 }
 
-function load_modifier_deck(number_bless, number_curses) {
+function load_modifier_deck() {
     var deck =
         {
             name: "Monster modifier deck",
@@ -762,10 +777,10 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
             var loaded_modifier_deck = JSON.parse(get_from_storage("modifier_deck"));
             var curses = count_type("curse", loaded_modifier_deck);
             var blessings = count_type("bless", loaded_modifier_deck);
-            for (var i =0; i < curses; i++) {
+            for (var i =0; i < blessings; i++) {
                 modifier_deck.add_card("bless");
             }
-            for (var i =0; i < blessings; i++) {
+            for (var i =0; i < curses; i++) {
                 modifier_deck.add_card("curse");
             }
             modifier_deck.draw_top_discard();
@@ -784,8 +799,14 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         deck.discard_deck();
     });
 
+    visible_ability_decks.forEach(function (deck) {
+        deck.deckid = deck.get_real_name().replace(/\s+/g, '');
+        add_deck_to_list(deck);
+    })
+
     decks_to_add.forEach(function (deck) {
         var deckid = deck.get_real_name().replace(/\s+/g, '');
+        deck.deckid = deckid;
         var deck_space = document.createElement("div");
         deck_space.id = deckid;
         deck_space.addEventListener('contextmenu', function(e) {            
@@ -830,27 +851,40 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         }
         visible_ability_decks.push(deck);
         
-        var currentdeckslist = document.getElementById("currentdeckslist");        
-        var list_item = document.createElement("li");
-        list_item.className = "currentdeck";
-        currentdeckslist.appendChild(list_item);
-        var label = document.createElement("a");
-        label.id = "switch-" + deckid;
-        label.href = "#switch-" + deckid
-        label.innerText = deck.get_real_name();
-        label.addEventListener("click", function(e){
-            var d = document.getElementById(this.id.replace("switch-",""));
-            d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
-        }, false)
-        list_item.appendChild(label);
+        add_deck_to_list(deck, deckid);
     });
 
     // Rescale card text if necessary
     refresh_ui();
 }
 
+function add_deck_to_list(deck) {
+    var currentdeckslist = document.getElementById("currentdeckslist");
+    var list_item = document.getElementById("currentdeck");
+    var list_item = document.createElement("li");
+    list_item.id = "currentdeck";
+    list_item.className = "currentdeck";
+    currentdeckslist.appendChild(list_item);
+    var label = document.createElement("a");
+    label.id = "switch-" + deck.deckid;
+    label.href = "#switch-" + deck.deckid;
+    label.innerText = deck.get_real_name();
+    var initiative = document.createElement("span");
+    initiative.id = label.id + "-initiative";
+    initiative.innerText = " (??)";
+    label.appendChild(initiative);
+    label.addEventListener("click", function(e){
+        var d = document.getElementById(this.id.replace("switch-",""));
+        d.className = (d.className == "hiddendeck") ? "card-container" : "hiddendeck";
+        visible_ability_decks = visible_ability_decks.filter(function(visible_deck) {
+            return visible_deck.name !== this.name;
+        });
+    }, false)
+    list_item.appendChild(label);
+}
+
 function init_modifier_deck() {
-    modifier_deck = load_modifier_deck(0,0);
+    modifier_deck = load_modifier_deck();
 }
 
 function count_type(type, deck) {

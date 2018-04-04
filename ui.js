@@ -33,6 +33,7 @@ function init_ui()
 
     settingspane =      document.getElementById("settingspane");
     settingsbtn =       document.getElementById("settingsbtn");
+    newroundbtn =       document.getElementById("newroundbtn");
     cancelarea =        document.getElementById("cancelarea");
 
     scenariotab.onclick = function(e)
@@ -48,6 +49,11 @@ function init_ui()
     settingsbtn.onclick = function(e)
     {
         show_settingspane(settingspane, cancelarea, true);
+    }
+
+    newroundbtn.onclick = function(e)
+    {
+        draw_all_visible_ability_cards();
     }
 
     cancelarea.onclick = function(e)
