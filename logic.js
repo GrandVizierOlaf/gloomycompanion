@@ -4,7 +4,7 @@
 var do_shuffles = true;
 var all_ability_decks = [];
 var visible_ability_decks = [];
-var visible_cards = [];
+var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
 
@@ -19,6 +19,39 @@ var EVENT_NAMES = {
     MODIFIER_CARD_DRAWN:            "modifierCardDrawn",
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
+
+function compare_initiatives(card_a, card_b) {
+  // TODO: Add player logic
+  if (card_a.initiative < card_b.initiative)
+    return -1;
+  if (card_a.initiative > card_b.initiative)
+    return 1;
+  return 0;
+}
+
+function reorder_switches() {
+    var current_decks = document.getElementById("currentdeckslist");
+    var items = current_decks.childNodes;
+    var itemsArr = [];
+
+    for (var i in items) {
+        if (items[i].nodeType == 1) { // get rid of the whitespace text nodes
+            itemsArr.push(items[i]);
+        }
+    }
+
+    itemsArr.sort(function(a, b) {
+      a = parseInt(a.textContent.replace(/\D+/g, ''));
+      b = parseInt(b.textContent.replace(/\D+/g, ''));
+      return a == b
+              ? 0
+              : (a > b ? 1 : -1);
+    });
+
+    for (i = 0; i < itemsArr.length; ++i) {
+      current_decks.appendChild(itemsArr[i]);
+    }
+}
 
 function UICard(front_element, back_element) {
     var card = {};
@@ -442,15 +475,6 @@ function send_to_discard(card, pull_animation) {
     card.ui.addClass("discard");
 }
 
-function compare_initiatives(card_a, card_b) {
-  // TODO: Add player logic
-  if (card_a.initiative < card_b.initiative)
-    return -1;
-  if (card_a.initiative > card_b.initiative)
-    return 1;
-  return 0;
-}
-
 function draw_all_visible_ability_cards() {
     visible_ability_decks.forEach(function (visible_deck) {
         draw_ability_card(visible_deck);
@@ -469,14 +493,14 @@ function draw_ability_card(deck) {
                 visible_deck.draw_top_card();
                 card = flip_up_top_card(visible_deck);
 
-                // Find the existing visible_card for this deck and remove it
-                visible_cards.push(card);
+                visible_cards[deck.deckid] = card;
 
                 div = document.getElementById("switch-" + deck.deckid + "-initiative");
                 div.innerText = " (" + card.initiative + ")";
             }
         });
     }
+    reorder_switches();
     write_to_storage(deck.name, JSON.stringify(deck));
 }
 
