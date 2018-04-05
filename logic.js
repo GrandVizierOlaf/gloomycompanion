@@ -45,8 +45,8 @@ function reorder_switches() {
     }
 
     itemsArr.sort(function(a, b) {
-      a_init = parseInt(a.textContent.replace(/\D+/g, ''));
-      b_init = parseInt(b.textContent.replace(/\D+/g, ''));
+      a_init = parseInt(a.textContent.replace(/\D+/g, '')) || 100;
+      b_init = parseInt(b.textContent.replace(/\D+/g, '')) || 100;
 
       a_is_player = a.classList.contains("player");
       b_is_player = b.classList.contains("player")
@@ -909,7 +909,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         }
         visible_ability_decks.push(deck);
         
-        add_deck_to_switch_list(deck, deckid);
+        add_deck_to_switch_list(deck);
     });
 
     add_all_players_to_switch_list();
@@ -942,14 +942,11 @@ function add_player_to_switch_list(player) {
     }, false);
     label.addEventListener("dblclick", function(e){
         list_item.classList.remove("switchremoved");
-        new_init = window.prompt("Input initiative for " + player.identifier);
-        if (!new_init) {
-            new_init = "??";
-        }
-        initiative.innerText = " (" + new_init + ")";
+        update_player_init(player);
         reorder_switches();
     }, false);
     list_item.appendChild(label);
+    write_to_storage("players", JSON.stringify(players));
 }
 
 function add_all_players_to_switch_list() {
@@ -958,22 +955,30 @@ function add_all_players_to_switch_list() {
     }
 }
 
-function update_all_player_inits() {
-    for (player_name in players) {
-        player = players[player_name];
+function update_player_init(player) {
         list_item = document.getElementById("switch-" + player.identifier);
         initiative = document.getElementById("switch-" + player.identifier + "-initiative");
         list_item.classList.remove("switchremoved");
         new_init = window.prompt("Input initiative for " + player.identifier);
+        player.initiative = new_init;
         if (!new_init) {
             new_init = "??";
         }
         initiative.innerText = " (" + new_init + ")";
+        write_to_storage("players", JSON.stringify(players));
+}
+
+function update_all_player_inits() {
+    for (player_name in players) {
+        update_player_init(players[player_name]);
     }
     reorder_switches();
 }
 
 function add_deck_to_switch_list(deck) {
+    // Don't put a new switch if one already exists
+    if (document.getElementById("switch-" + deck.deckid)) return;
+
     var switcheslist = document.getElementById("switcheslist");
     var list_item = document.createElement("li");
     list_item.className = "switch noselect";
@@ -983,7 +988,11 @@ function add_deck_to_switch_list(deck) {
     label.innerText = deck.get_real_name();
     var initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
-    initiative.innerText = " (??)";
+    if (deck.deckid in visible_cards) {
+        initiative.innerText = " (" + visible_cards[deck.deckid].initiative + ")";
+    } else {
+        initiative.innerText = " (??)";
+    }
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
