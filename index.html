@@ -7,6 +7,7 @@
         <link rel="manifest" href="app.webmanifest" />
         <link rel="stylesheet" href="cards.css" />
         <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="lib/jsmodal.css" />
         <meta charset="UTF-8">
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -21,6 +22,8 @@
         <script type="text/javascript" src="monster_stats.js"></script>
         <script type="text/javascript" src="logic.js"></script>
         <script type="text/javascript" src="ui.js"></script>
+        <script type="text/javascript" src="numpad.js"></script>
+        <script type="text/javascript" src="lib/jsmodal-1.0d.min.js"></script>
     </head>
     <body onload="init(); init_ui();">
         <div class="panecontainer">
@@ -72,6 +75,57 @@
             </div>
         </div>
         <div id="tableau" style="font-size: 26.6px;"> <!-- base font size for all cards. Placed here to make it adjustable from javascript -->
+        </div>
+        <div id='num-pad' style="visibility:hidden;">
+          <div class='row' id='display-row'>
+            <span id='full-num'>
+              
+            </span>
+          </div>
+          <div class='keys-row'>
+            <span class='num-key enabled' id='1-key'>
+              1  
+            </span>
+            <span class='num-key enabled' id='2-key'>
+              2  
+            </span>
+            <span class='num-key enabled' id='3-key'>
+              3  
+            </span>
+          </div>
+          <div class='keys-row'>
+            <span class='num-key enabled' id='4-key'>
+              4
+            </span>
+            <span class='num-key enabled' id='5-key'>
+              5    
+            </span>
+            <span class='num-key enabled' id='6-key'>
+              6  
+            </span>
+          </div>
+          <div class='keys-row'>
+            <span class='num-key enabled' id='7-key'>
+              7  
+            </span>
+            <span class='num-key enabled' id='8-key'>
+              8  
+            </span>
+            <span class='num-key enabled' id='9-key'>
+              9  
+            </span>
+          </div>
+          <div class='keys-row'>
+            <span class='key' id='clr-key'>
+              clr  
+            </span>
+            <span class='num-key enabled' id='0-key'>
+              0  
+            </span>
+            <span class='key' id='back-key'>
+              <  
+            </span>
+          </div>
         </div>
     </body>
 </html>

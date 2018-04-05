@@ -959,12 +959,15 @@ function update_player_init(player) {
         list_item = document.getElementById("switch-" + player.identifier);
         initiative = document.getElementById("switch-" + player.identifier + "-initiative");
         list_item.classList.remove("switchremoved");
-        new_init = window.prompt("Input initiative for " + player.identifier);
-        player.initiative = new_init;
-        if (!new_init) {
-            new_init = "??";
-        }
-        initiative.innerText = " (" + new_init + ")";
+        numpad = document.getElementById('num-pad');
+        numpad.style.visibility = 'visible';
+        list_item.append(numpad);
+        // new_init = window.prompt("Input initiative for " + player.identifier);
+        // player.initiative = new_init;
+        // if (!new_init) {
+        //     new_init = "??";
+        // }
+        // initiative.innerText = " (" + new_init + ")";
         write_to_storage("players", JSON.stringify(players));
 }
 
