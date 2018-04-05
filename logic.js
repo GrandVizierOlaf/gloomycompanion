@@ -893,6 +893,10 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         add_deck_to_switch_list(deck, deckid);
     });
 
+    for (player in player) {
+        add_player_to_switch_list(player);
+    }
+    
     // Rescale card text if necessary
     refresh_ui();
 }
@@ -903,17 +907,28 @@ function add_player_to_switch_list(player) {
 
     var switcheslist = document.getElementById("switcheslist");
     var list_item = document.createElement("li");
-    list_item.className = "switch";
+    list_item.className = "switch noselect";
     switcheslist.appendChild(list_item);
     var label = document.createElement("a");
     label.id = "switch-" + player.identifier;
     label.innerText = player.identifier;
     var initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
-    initiative.innerText = " (??)";
+    if (player.initiative) {
+        initiative.innerText = " (" + player.initiative + ")";
+    } else {
+        initiative.innerText = " (??)";
+    }
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         list_item.classList.toggle("switchremoved");
+    }, false);
+    label.addEventListener("dblclick", function(e){
+        new_init = window.prompt("Input initiative for " + player.identifier);
+        if (!new_init) {
+            new_init = "??";
+        }
+        initiative.innerText = " (" + new_init + ")";
     }, false);
     list_item.appendChild(label);
 }
@@ -921,7 +936,7 @@ function add_player_to_switch_list(player) {
 function add_deck_to_switch_list(deck) {
     var switcheslist = document.getElementById("switcheslist");
     var list_item = document.createElement("li");
-    list_item.className = "switch";
+    list_item.className = "switch noselect";
     switcheslist.appendChild(list_item);
     var label = document.createElement("a");
     label.id = "switch-" + deck.deckid;
