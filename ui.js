@@ -23,12 +23,14 @@ function init_ui()
     var tabs =
     {
         scenarios:      document.getElementById("scenariotab"),
-        decks:          document.getElementById("deckstab")
+        decks:          document.getElementById("deckstab"),
+        players:        document.getElementById("playerstab")
     };
     var pages =
     {
         scenarios:      document.getElementById("scenariospage"),
-        decks:          document.getElementById("deckspage")
+        decks:          document.getElementById("deckspage"),
+        players:        document.getElementById("playerspage")
     };
 
     settingspane =      document.getElementById("settingspane");
@@ -44,6 +46,11 @@ function init_ui()
     deckstab.onclick = function(e)
     {
         activate_tab(tabs, pages, "decks");
+    }
+
+    playerstab.onclick = function(e)
+    {
+        activate_tab(tabs, pages, "players");
     }
 
     settingsbtn.onclick = function(e)

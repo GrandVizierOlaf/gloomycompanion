@@ -4,6 +4,7 @@
 var do_shuffles = true;
 var all_ability_decks = [];
 var visible_ability_decks = [];
+var players = {};
 var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
@@ -20,9 +21,21 @@ var EVENT_NAMES = {
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
 
+function add_player(identifier) {
+    if (!identifier) return;
+
+    character = {
+        initiative: null,
+        identifier: identifier
+    };
+
+    players[identifier] = character;
+    add_player_to_switch_list(character);
+}
+
 function reorder_switches() {
-    var current_decks = document.getElementById("currentdeckslist");
-    var items = current_decks.childNodes;
+    var switches = document.getElementById("switcheslist");
+    var items = switches.childNodes;
     var itemsArr = [];
 
     for (var i in items) {
@@ -40,7 +53,7 @@ function reorder_switches() {
     });
 
     for (i = 0; i < itemsArr.length; ++i) {
-      current_decks.appendChild(itemsArr[i]);
+      switches.appendChild(itemsArr[i]);
     }
 }
 
@@ -783,7 +796,7 @@ function get_boss_stats(name, level) {
 
 function apply_deck_selection(decks, preserve_existing_deck_state) {
     var container = document.getElementById("tableau");
-    document.getElementById("currentdeckslist").innerHTML = "";
+    document.getElementById("switcheslist").innerHTML = "";
     var decks_to_remove = visible_ability_decks.filter(function (visible_deck) {
         return !preserve_existing_deck_state || (decks.filter(function (deck) {
                 return ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))
@@ -884,16 +897,34 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     refresh_ui();
 }
 
-function add_deck_to_switch_list(deck) {
-    var currentdeckslist = document.getElementById("currentdeckslist");
-    var list_item = document.getElementById("currentdeck");
+function add_player_to_switch_list(player) {
+    // Don't put a new switch if one already exists
+    if (document.getElementById("switch-" + player.identifier)) return;
+
+    var switcheslist = document.getElementById("switcheslist");
     var list_item = document.createElement("li");
-    list_item.id = "currentdeck";
-    list_item.className = "currentdeck";
-    currentdeckslist.appendChild(list_item);
+    list_item.className = "switch";
+    switcheslist.appendChild(list_item);
+    var label = document.createElement("a");
+    label.id = "switch-" + player.identifier;
+    label.innerText = player.identifier;
+    var initiative = document.createElement("span");
+    initiative.id = label.id + "-initiative";
+    initiative.innerText = " (??)";
+    label.appendChild(initiative);
+    label.addEventListener("click", function(e){
+        list_item.classList.toggle("switchremoved");
+    }, false);
+    list_item.appendChild(label);
+}
+
+function add_deck_to_switch_list(deck) {
+    var switcheslist = document.getElementById("switcheslist");
+    var list_item = document.createElement("li");
+    list_item.className = "switch";
+    switcheslist.appendChild(list_item);
     var label = document.createElement("a");
     label.id = "switch-" + deck.deckid;
-    label.href = "#switch-" + deck.deckid;
     label.innerText = deck.get_real_name();
     var initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
@@ -903,13 +934,13 @@ function add_deck_to_switch_list(deck) {
         var d = document.getElementById(this.id.replace("switch-",""));
         if (d.classList.contains("hiddendeck")) {
             visible_ability_decks.push(deck);
-            list_item.style.setProperty("text-decoration", "");
+            list_item.classList.remove("switchremoved");
         } else {
             visible_ability_decks.splice(visible_ability_decks.indexOf(deck), 1);
-            list_item.style.setProperty("text-decoration", "line-through");
+            list_item.classList.add("switchremoved");
         }
         d.classList.toggle("hiddendeck");
-    }, false)
+    }, false);
     list_item.addEventListener("mouseenter", function(e){
         var d = document.getElementById(this.firstElementChild.id.replace("switch-",""));
         d.classList.add("hoveredswitch");
@@ -1188,16 +1219,54 @@ function ScenarioList(scenarios) {
     return scenariolist;
 }
 
+function PlayerList() {
+    var playerlist = [];
+
+    playerlist.get_selection = function () {
+        playerlist = [];
+        for (var i = 1; i <= 4; i++) {
+            var playerInput = document.getElementById("player" + i + "input");
+            playerlist.push(playerInput.value);
+        }
+        return playerlist;
+    }
+
+    playerlist.set_selection = function (selected_player_names) {
+        for (var i = 1; i <= 4; i++) {
+            var playerInput = document.getElementById("player" + i + "input");
+            playerInput.value = null;
+            if (selected_player_names[i - 1]) {
+                playerInput.value = selected_player_names[i - 1];
+            }
+        }
+    }
+
+    playerlist.update_global_players = function () {
+        players = {};
+        for (var i = playerlist.length - 1; i >= 0; i--) {
+            if (playerlist[i]) {
+                add_player(playerlist[i]);
+            }
+        }
+    }
+
+    return playerlist;
+}
+
 function init() {
     var deckspage = document.getElementById("deckspage");
     var scenariospage = document.getElementById("scenariospage");
+    var playerspage = document.getElementById("playerspage");
     var applydeckbtn = document.getElementById("applydecks");
     var applyscenariobtn = document.getElementById("applyscenario");
     var applyloadbtn = document.getElementById("applyload");
+    var applyplayersbtn = document.getElementById("applyplayers");
+    var loadplayersbtn = document.getElementById("loadplayers");
     var showmodifierdeck = document.getElementById("showmodifierdeck");
 
     var decklist = new DeckList();
     var scenariolist = new ScenarioList(SCENARIO_DEFINITIONS);
+    var playerlist = new PlayerList();
 
     deckspage.insertAdjacentElement("afterbegin", decklist.ul);
     scenariospage.insertAdjacentElement("afterbegin", scenariolist.ul);
@@ -1240,7 +1309,7 @@ function init() {
 
     applyloadbtn.onclick = function () {
         var selected_deck_names = JSON.parse(get_from_storage("selected_deck_names"));
-        decklist.set_selection(selected_deck_names);
+        playerlist.set_selection(selected_deck_names);
         var selected_decks = selected_deck_names.map(function (deck_names) {
             return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
         });
@@ -1252,6 +1321,18 @@ function init() {
         else{
             modifier_deck_section.style.display = "block";
         }
+    }
+
+    applyplayersbtn.onclick = function () {
+        playerlist.get_selection();
+        playerlist.update_global_players();
+        write_to_storage("players", JSON.stringify(players));
+    }
+
+    loadplayersbtn.onclick = function () {
+        var loaded_players = JSON.parse(get_from_storage("players"));
+        playerlist.set_selection(Object.keys(loaded_players));
+        playerlist.update_global_players();
     }
 
     window.onresize = refresh_ui.bind(null, visible_ability_decks);

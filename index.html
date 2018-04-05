@@ -28,6 +28,7 @@
                 <ul class="tabcontainer">
                     <li id="scenariotab">Scenario</li>
                     <li id="deckstab">Decks</li>
+                    <li id="playerstab">Players</li>
                 </ul>
                 <div id="scenariospage" class="tabbody">
                     <input id="showmodifierdeck" type="checkbox" checked /><label for="showmodifierdeck">Show Monster Modifier Deck</label>
@@ -41,6 +42,17 @@
                     <input id="showmodifierdeck-deckspage" type="checkbox" checked /><label for="showmodifierdeck-deckspage">Show Monster Modifier Deck</label>
                     <input id="applydecks" type="button" value="Apply" />
                 </div>
+                <div id="playerspage" class="tabbody">
+                    <div>Enter an identifier for each player. The identifier can be a player name, character name, the character's class, or anything else you'd like.</div>
+                    <br/>
+                    <div>For any players not used, leave the box empty.</div>
+                    <input id="player1input" class="playerinput" type="text" placeholder="Player 1 Identifier" /><br/>
+                    <input id="player2input" class="playerinput" type="text" placeholder="Player 2 Identifier" /><br/>
+                    <input id="player3input" class="playerinput" type="text" placeholder="Player 3 Identifier" /><br/>
+                    <input id="player4input" class="playerinput" type="text" placeholder="Player 4 Identifier" /><br/>
+                    <input id="applyplayers" type="button" value="Apply" /><br/>
+                    <input id="loadplayers" type="button" value="Load Previous Players" />
+                </div>
             </div>
             <div id="cancelarea">
             </div>
@@ -48,8 +60,8 @@
         <div>
             <input alt="Configure" id="settingsbtn" type="image" src="images/settings.svg" />
             <input alt="New Round" id="newroundbtn" type="image" src="images/shuffle-black.svg" />
-            <div id="currentdecks">
-                <ul id="currentdeckslist" class="currentdeckslist">
+            <div id="switchs">
+                <ul id="switcheslist" class="switcheslist">
 
                 </ul>
             </div>

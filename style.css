@@ -69,6 +69,7 @@ ul.tabcontainer .inactive
 {
     padding:            1em;
     margin-bottom:      4em;
+    width: 300px;
 }
 
 .tabbody.inactive
@@ -117,12 +118,17 @@ ul.tabcontainer .inactive
     left:               calc(-100% - 2em);
 }
 
+.playerinput
+{
+    width: 100%;
+}
+
 .hiddendeck
 {
     display: none;
 }
 
-ul.currentdeckslist {
+ul.switcheslist {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -132,21 +138,25 @@ ul.currentdeckslist {
     font-size:                  130%;
 }
 
-li.currentdeck {
+li.switch {
     float: left;
     border: solid;
     border-color: black;
     border-width: 0 1px;
 }
 
-li.currentdeck a {
+li.switchremoved {
+    text-decoration: line-through;
+}
+
+li.switch a {
     display: block;
     text-align: center;
     padding: 10px;
     text-decoration: none;
 }
 
-li.currentdeck a:hover {
+li.switch a:hover {
     background-color: #AAAAAA;
 }
 
