@@ -48,11 +48,14 @@
                     <div>For any players not used, leave the box empty.</div>
                     <br/>
                     <div>When in-game, double-click a player's name to set its initiative.</div>
-                    <input id="player1input" class="playerinput" type="text" placeholder="Player 1 Identifier" /><br/>
-                    <input id="player2input" class="playerinput" type="text" placeholder="Player 2 Identifier" /><br/>
-                    <input id="player3input" class="playerinput" type="text" placeholder="Player 3 Identifier" /><br/>
-                    <input id="player4input" class="playerinput" type="text" placeholder="Player 4 Identifier" /><br/>
-                    <input id="applyplayers" type="button" value="Apply" /><br/>
+                    <form id="playerinputform">
+                        <input id="player1input" class="playerinput" type="text" placeholder="Player 1 Identifier" /><br/>
+                        <input id="player2input" class="playerinput" type="text" placeholder="Player 2 Identifier" /><br/>
+                        <input id="player3input" class="playerinput" type="text" placeholder="Player 3 Identifier" /><br/>
+                        <input id="player4input" class="playerinput" type="text" placeholder="Player 4 Identifier" /><br/>
+                        <input id="applyplayers" type="button" value="Apply" /><br/>
+                        <input type="submit" style="display: none" />
+                    </form>
                     <input id="loadplayers" type="button" value="Load Previous Players" />
                 </div>
             </div>

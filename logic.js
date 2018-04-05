@@ -47,9 +47,15 @@ function reorder_switches() {
     itemsArr.sort(function(a, b) {
       a = parseInt(a.textContent.replace(/\D+/g, ''));
       b = parseInt(b.textContent.replace(/\D+/g, ''));
-      return a == b
-              ? 0
-              : (a > b ? 1 : -1);
+
+      if (a == b) {
+        // TODO: Check if one is player
+        return 0;
+      } else if (a > b) {
+        return 1;
+      } else if (a < b) {
+        return -1;
+      }
     });
 
     for (i = 0; i < itemsArr.length; ++i) {
@@ -893,9 +899,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         add_deck_to_switch_list(deck, deckid);
     });
 
-    for (player in player) {
-        add_player_to_switch_list(player);
-    }
+    add_all_players_to_switch_list();
     
     // Rescale card text if necessary
     refresh_ui();
@@ -924,13 +928,21 @@ function add_player_to_switch_list(player) {
         list_item.classList.toggle("switchremoved");
     }, false);
     label.addEventListener("dblclick", function(e){
+        list_item.classList.remove("switchremoved");
         new_init = window.prompt("Input initiative for " + player.identifier);
         if (!new_init) {
             new_init = "??";
         }
         initiative.innerText = " (" + new_init + ")";
+        reorder_switches();
     }, false);
     list_item.appendChild(label);
+}
+
+function add_all_players_to_switch_list() {
+    for (player in players) {
+        add_player_to_switch_list(players[player]);
+    }
 }
 
 function add_deck_to_switch_list(deck) {
@@ -1277,6 +1289,7 @@ function init() {
     var applyloadbtn = document.getElementById("applyload");
     var applyplayersbtn = document.getElementById("applyplayers");
     var loadplayersbtn = document.getElementById("loadplayers");
+    var playerinputform = document.getElementById("playerinputform");
     var showmodifierdeck = document.getElementById("showmodifierdeck");
 
     var decklist = new DeckList();
@@ -1338,11 +1351,15 @@ function init() {
         }
     }
 
-    applyplayersbtn.onclick = function () {
+    function applyplayers(e) {
+        e.preventDefault();
         playerlist.get_selection();
         playerlist.update_global_players();
         write_to_storage("players", JSON.stringify(players));
     }
+
+    applyplayersbtn.onclick = applyplayers;
+    playerinputform.onsubmit = applyplayers;
 
     loadplayersbtn.onclick = function () {
         var loaded_players = JSON.parse(get_from_storage("players"));
