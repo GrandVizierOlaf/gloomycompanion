@@ -1301,6 +1301,7 @@ function PlayerList() {
             playerInput.value = null;
             if (selected_player_names[i - 1]) {
                 playerInput.value = selected_player_names[i - 1];
+                playerlist.push(playerInput.value);
             }
         }
     }
