@@ -45,15 +45,28 @@ function reorder_switches() {
     }
 
     itemsArr.sort(function(a, b) {
-      a = parseInt(a.textContent.replace(/\D+/g, ''));
-      b = parseInt(b.textContent.replace(/\D+/g, ''));
+      a_init = parseInt(a.textContent.replace(/\D+/g, ''));
+      b_init = parseInt(b.textContent.replace(/\D+/g, ''));
 
-      if (a == b) {
-        // TODO: Check if one is player
+      a_is_player = a.classList.contains("player");
+      b_is_player = b.classList.contains("player")
+
+      if (a_init == b_init) {
+        if (a_is_player && !b_is_player) {
+            return -1;
+        } else if (!a_is_player && b_is_player) {
+            return 1;
+        } else if (a_is_player && b_is_player) {
+            // TODO: Get second card values
+            return 0;
+        } else {
+            return 0;
+        }
+        
         return 0;
-      } else if (a > b) {
+      } else if (a_init > b_init) {
         return 1;
-      } else if (a < b) {
+      } else if (a_init < b_init) {
         return -1;
       }
     });
@@ -911,7 +924,7 @@ function add_player_to_switch_list(player) {
 
     var switcheslist = document.getElementById("switcheslist");
     var list_item = document.createElement("li");
-    list_item.className = "switch noselect";
+    list_item.className = "switch noselect player";
     switcheslist.appendChild(list_item);
     var label = document.createElement("a");
     label.id = "switch-" + player.identifier;
@@ -943,6 +956,21 @@ function add_all_players_to_switch_list() {
     for (player in players) {
         add_player_to_switch_list(players[player]);
     }
+}
+
+function update_all_player_inits() {
+    for (player_name in players) {
+        player = players[player_name];
+        list_item = document.getElementById("switch-" + player.identifier);
+        initiative = document.getElementById("switch-" + player.identifier + "-initiative");
+        list_item.classList.remove("switchremoved");
+        new_init = window.prompt("Input initiative for " + player.identifier);
+        if (!new_init) {
+            new_init = "??";
+        }
+        initiative.innerText = " (" + new_init + ")";
+    }
+    reorder_switches();
 }
 
 function add_deck_to_switch_list(deck) {
