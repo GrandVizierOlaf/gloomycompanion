@@ -2,12 +2,13 @@
 <html manifest="app.manifest">
     <head>
         <title>Gloomy Companion</title>
-        <link rel="apple-touch-icon" sizes="192x192" href="images/icon.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/images/icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/images/icon.png" />
         <link rel="manifest" href="app.webmanifest" />
-        <link rel="stylesheet" href="cards.css" />
-        <link rel="stylesheet" href="style.css" />
-        <link rel="stylesheet" href="lib/jsmodal.css" />
+        <link rel="stylesheet" href="css/cards.css" />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="css/jsmodal.css" />
+        <link rel="stylesheet" href="css/jquery.keypad.css"> 
         <meta charset="UTF-8">
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -22,8 +23,10 @@
         <script type="text/javascript" src="monster_stats.js"></script>
         <script type="text/javascript" src="logic.js"></script>
         <script type="text/javascript" src="ui.js"></script>
-        <script type="text/javascript" src="numpad.js"></script>
         <script type="text/javascript" src="lib/jsmodal-1.0d.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script type="text/javascript" src="lib/jquery.plugin.min.js"></script> 
+        <script type="text/javascript" src="lib/jquery.keypad.min.js"></script>
     </head>
     <body onload="init(); init_ui();">
         <div class="panecontainer">
@@ -51,11 +54,13 @@
                     <div>For any players not used, leave the box empty.</div>
                     <br/>
                     <div>When in-game, double-click a player's name to set its initiative.</div>
+                    <br/>
+                    <div class="playeridheader">Identifiers</div><div class="playerlevelheader">Levels</div>
                     <form id="playerinputform">
-                        <input id="player1input" class="playerinput" type="text" placeholder="Player 1 Identifier" /><br/>
-                        <input id="player2input" class="playerinput" type="text" placeholder="Player 2 Identifier" /><br/>
-                        <input id="player3input" class="playerinput" type="text" placeholder="Player 3 Identifier" /><br/>
-                        <input id="player4input" class="playerinput" type="text" placeholder="Player 4 Identifier" /><br/>
+                        <input id="player1idinput" class="playeridinput" type="text" placeholder="Player 1 Identifier" /><input id="player1levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
+                        <input id="player2idinput" class="playeridinput" type="text" placeholder="Player 2 Identifier" /><input id="player2levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
+                        <input id="player3idinput" class="playeridinput" type="text" placeholder="Player 3 Identifier" /><input id="player3levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
+                        <input id="player4idinput" class="playeridinput" type="text" placeholder="Player 4 Identifier" /><input id="player4levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
                         <input id="applyplayers" type="button" value="Apply" /><br/>
                         <input type="submit" style="display: none" />
                     </form>
@@ -66,8 +71,9 @@
             </div>
         </div>
         <div>
-            <input alt="Configure" id="settingsbtn" type="image" src="images/settings.svg" />
-            <input alt="New Round" id="newroundbtn" type="image" src="images/shuffle-black.svg" />
+            <input alt="Configure" id="settingsbtn" type="image" src="/images/settings.svg" />
+            <input alt="New Round" id="newroundbtn" type="image" src="/images/shuffle-black.svg" />
+            <div id="roundcounter">1</div>
             <div id="switchs">
                 <ul id="switcheslist" class="switcheslist">
 
@@ -75,57 +81,6 @@
             </div>
         </div>
         <div id="tableau" style="font-size: 26.6px;"> <!-- base font size for all cards. Placed here to make it adjustable from javascript -->
-        </div>
-        <div id='num-pad' style="visibility:hidden;">
-          <div class='row' id='display-row'>
-            <span id='full-num'>
-              
-            </span>
-          </div>
-          <div class='keys-row'>
-            <span class='num-key enabled' id='1-key'>
-              1  
-            </span>
-            <span class='num-key enabled' id='2-key'>
-              2  
-            </span>
-            <span class='num-key enabled' id='3-key'>
-              3  
-            </span>
-          </div>
-          <div class='keys-row'>
-            <span class='num-key enabled' id='4-key'>
-              4
-            </span>
-            <span class='num-key enabled' id='5-key'>
-              5    
-            </span>
-            <span class='num-key enabled' id='6-key'>
-              6  
-            </span>
-          </div>
-          <div class='keys-row'>
-            <span class='num-key enabled' id='7-key'>
-              7  
-            </span>
-            <span class='num-key enabled' id='8-key'>
-              8  
-            </span>
-            <span class='num-key enabled' id='9-key'>
-              9  
-            </span>
-          </div>
-          <div class='keys-row'>
-            <span class='key' id='clr-key'>
-              clr  
-            </span>
-            <span class='num-key enabled' id='0-key'>
-              0  
-            </span>
-            <span class='key' id='back-key'>
-              <  
-            </span>
-          </div>
         </div>
     </body>
 </html>

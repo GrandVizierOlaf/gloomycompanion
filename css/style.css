@@ -118,9 +118,28 @@ ul.tabcontainer .inactive
     left:               calc(-100% - 2em);
 }
 
-.playerinput
+.playeridinput
 {
-    width: 100%;
+    width: 75%;
+}
+
+.playeridheader
+{
+    width: 75%;
+    float: left;
+}
+
+.playerlevelinput
+{
+    margin-left: 5px;
+    width: 10%;
+}
+
+.playerlevelheader
+{
+    margin-left: 9px;
+    width: 10%;
+    float: left;
 }
 
 .hiddendeck
@@ -154,6 +173,10 @@ li.switch a {
     text-align: center;
     padding: 10px;
     text-decoration: none;
+}
+
+li.switch a.switchroundover {
+    color: darkgray;
 }
 
 li.switch a:hover {
@@ -203,4 +226,16 @@ li.switch a:hover {
     height:             5ch;
     cursor:             pointer;
     z-index:            1;
+    float:              left;
+}
+
+#roundcounter
+{
+    margin-left:        2.4em;
+    margin-top:         1em;
+    width:              5ch;
+    cursor:             pointer;
+    z-index:            1;
+    font-family:        'PirataOne';
+    font-size:          300%;
 }

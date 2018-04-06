@@ -8,6 +8,7 @@ var players = {};
 var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
+var modal_open = false;
 
 var DECK_TYPES =
     {
@@ -21,11 +22,12 @@ var EVENT_NAMES = {
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
 
-function add_player(identifier) {
-    if (!identifier) return;
+function add_player(identifier, level) {
+    if (!player) return;
 
     character = {
         initiative: null,
+        level: level,
         identifier: identifier
     };
 
@@ -161,7 +163,7 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
 
     if (shuffle) {
         var shuffle_img = document.createElement("img");
-        shuffle_img.src = "images/shuffle.svg";
+        shuffle_img.src = "/images/shuffle.svg";
         card.appendChild(shuffle_img);
     }
 
@@ -520,6 +522,8 @@ function draw_ability_card(deck) {
 
                 div = document.getElementById("switch-" + deck.deckid + "-initiative");
                 div.innerText = " (" + card.initiative + ")";
+                document.getElementById("switch-" + deck.deckid).classList.remove("switchroundover");
+                document.getElementById(deck.deckid).classList.remove("deckroundover");
             }
         });
     }
@@ -938,10 +942,10 @@ function add_player_to_switch_list(player) {
     }
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
-        list_item.classList.toggle("switchremoved");
+        label.classList.toggle("switchroundover");
     }, false);
     label.addEventListener("dblclick", function(e){
-        list_item.classList.remove("switchremoved");
+        label.classList.remove("switchroundover");
         update_player_init(player);
         reorder_switches();
     }, false);
@@ -950,8 +954,16 @@ function add_player_to_switch_list(player) {
 }
 
 function add_all_players_to_switch_list() {
-    for (player in players) {
-        add_player_to_switch_list(players[player]);
+    for (player_name in players) {
+        add_player_to_switch_list(players[player_name]);
+    }
+}
+
+function wait_for_modal_close() {
+    if (modal_open) {
+        setTimeout(wait_for_modal_close, 1000);
+    } else {
+        return;
     }
 }
 
@@ -959,15 +971,41 @@ function update_player_init(player) {
         list_item = document.getElementById("switch-" + player.identifier);
         initiative = document.getElementById("switch-" + player.identifier + "-initiative");
         list_item.classList.remove("switchremoved");
-        numpad = document.getElementById('num-pad');
-        numpad.style.visibility = 'visible';
-        list_item.append(numpad);
-        // new_init = window.prompt("Input initiative for " + player.identifier);
-        // player.initiative = new_init;
-        // if (!new_init) {
-        //     new_init = "??";
-        // }
-        // initiative.innerText = " (" + new_init + ")";
+        var modal_div = document.createElement('form');
+        modal_div.innerText = 'Enter initiative for ' + player.identifier;
+        var modal_input = document.createElement('input');
+        modal_input.id = 'modal_input_' + player.identifier;
+        modal_input.type = 'number';
+        modal_div.appendChild(modal_input);
+        var modal_submit = document.createElement('input');
+        modal_submit.type = "submit";
+        modal_div.appendChild(modal_submit);
+        Modal.open({
+            openCallback: function () {
+                modal_open = true;
+                $('#modal_input').keypad({keypadOnly: false, showAnim: '', onClose: function(value, inst) {
+                    console.log(value);
+                    modal_input.value = value;
+                    Modal.close();
+                }});
+                $('#modal_input').keypad('show');
+            },
+            content: modal_div.outerHTML,
+            closeCallback: function () {
+                modal_open = false;
+                new_init = modal_input.value;
+                player.initiative = new_init;
+                if (!new_init) {
+                    new_init = "??";
+                }
+                initiative.innerText = " (" + new_init + ")";
+            }
+        });
+        modal_submit.addEventListener("submit", function (e) {
+            e.preventDefault();
+            Modal.close();
+        });
+        wait_for_modal_close();
         write_to_storage("players", JSON.stringify(players));
 }
 
@@ -998,6 +1036,15 @@ function add_deck_to_switch_list(deck) {
     }
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
+        var d = document.getElementById(this.id.replace("switch-",""));
+        if (d.classList.contains("deckroundover")) {
+            label.classList.remove("switchroundover");
+        } else {
+            label.classList.add("switchroundover");
+        }
+        d.classList.toggle("deckroundover");
+    }, false);
+    label.addEventListener("dblclick", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
         if (d.classList.contains("hiddendeck")) {
             visible_ability_decks.push(deck);
@@ -1292,33 +1339,53 @@ function PlayerList() {
     playerlist.get_selection = function () {
         playerlist = [];
         for (var i = 1; i <= 4; i++) {
-            var playerInput = document.getElementById("player" + i + "input");
-            playerlist.push(playerInput.value);
+            var playerIdInput = document.getElementById("player" + i + "idinput");
+            var playerLevelInput = document.getElementById("player" + i + "levelinput");
+            player = {};
+            player.identifier = playerIdInput.value;
+            player.level = playerLevelInput.value;
+            playerlist.push(player);
         }
         return playerlist;
     }
 
-    playerlist.set_selection = function (selected_player_names) {
+    playerlist.set_selection = function (selected_players) {
+        // Default out the inputs
         for (var i = 1; i <= 4; i++) {
-            var playerInput = document.getElementById("player" + i + "input");
-            playerInput.value = null;
-            if (selected_player_names[i - 1]) {
-                playerInput.value = selected_player_names[i - 1];
-                playerlist.push(playerInput.value);
-            }
+            var playerIdInput = document.getElementById("player" + i + "idinput");
+            var playerLevelInput = document.getElementById("player" + i + "levelinput");
+            playerIdInput.value = null;
+            playerLevelInput.value = 1;
+        }
+
+        var i = 1;
+        for (player_name in selected_players) {
+            var playerIdInput = document.getElementById("player" + i + "idinput");
+            var playerLevelInput = document.getElementById("player" + i + "levelinput");
+
+            player = selected_players[player_name];
+            playerIdInput.value = player.identifier;
+            playerLevelInput.value = player.level;
+            playerlist.push(player);
+            i++;
         }
     }
 
     playerlist.update_global_players = function () {
         players = {};
-        for (var i = playerlist.length - 1; i >= 0; i--) {
-            if (playerlist[i]) {
-                add_player(playerlist[i]);
+        for (var i = 0; i < playerlist.length; i++) {
+            if (playerlist[i].identifier) {
+                add_player(playerlist[i].identifier, playerlist[i].level);
             }
         }
     }
 
     return playerlist;
+}
+
+function increment_round_counter() {
+    var counter = document.getElementById("roundcounter");
+    counter.innerText++;
 }
 
 function init() {
@@ -1341,7 +1408,7 @@ function init() {
     scenariospage.insertAdjacentElement("afterbegin", scenariolist.ul);
 
     applydeckbtn.onclick = function () {
-        localStorage.clear();
+        localStorage.removeItem("selected_deck_names");
         var selected_deck_names = decklist.get_selected_decks();
         write_to_storage("selected_deck_names", JSON.stringify(selected_deck_names));
         var selected_decks = selected_deck_names.map(function (deck_names) {
@@ -1359,7 +1426,7 @@ function init() {
     };
 
     applyscenariobtn.onclick = function () {
-        localStorage.clear();
+        localStorage.removeItem("selected_deck_names");
         var selected_deck_names = scenariolist.get_scenario_decks();
         write_to_storage("selected_deck_names", JSON.stringify(selected_deck_names));
         decklist.set_selection(selected_deck_names);
@@ -1377,8 +1444,8 @@ function init() {
     };
 
     applyloadbtn.onclick = function () {
+        loadplayers();
         var selected_deck_names = JSON.parse(get_from_storage("selected_deck_names"));
-        playerlist.set_selection(selected_deck_names);
         var selected_decks = selected_deck_names.map(function (deck_names) {
             return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
         });
@@ -1399,14 +1466,17 @@ function init() {
         write_to_storage("players", JSON.stringify(players));
     }
 
+    function loadplayers() {
+        var loaded_players = JSON.parse(get_from_storage("players"));
+        playerlist.set_selection(loaded_players);
+        playerlist.update_global_players();
+
+    }
+
     applyplayersbtn.onclick = applyplayers;
     playerinputform.onsubmit = applyplayers;
 
-    loadplayersbtn.onclick = function () {
-        var loaded_players = JSON.parse(get_from_storage("players"));
-        playerlist.set_selection(Object.keys(loaded_players));
-        playerlist.update_global_players();
-    }
+    loadplayersbtn.onclick = loadplayers;
 
     window.onresize = refresh_ui.bind(null, visible_ability_decks);
 }
