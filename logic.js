@@ -1383,9 +1383,25 @@ function PlayerList() {
     return playerlist;
 }
 
+function load_round_counter() {
+    var round_num = get_from_storage("roundnumber");
+    if (!round_num) {
+        round_num = 1;
+    }
+    var counter = document.getElementById("roundcounter");
+    counter.innerText = round_num;
+}
+
+function reset_round_counter() {
+    localStorage.removeItem("roundnumber");
+    var counter = document.getElementById("roundcounter");
+    counter.innerText = 1;
+}
+
 function increment_round_counter() {
     var counter = document.getElementById("roundcounter");
     counter.innerText++;
+    write_to_storage("roundnumber", counter.innerText);
 }
 
 function init() {
@@ -1423,6 +1439,7 @@ function init() {
         else{
             modifier_deck_section.style.display = "block";
         }
+        reset_round_counter();
     };
 
     applyscenariobtn.onclick = function () {
@@ -1441,10 +1458,12 @@ function init() {
         else{
             modifier_deck_section.style.display = "block";
         }
+        reset_round_counter();
     };
 
     applyloadbtn.onclick = function () {
-        loadplayers();
+        load_players();
+        load_round_counter();
         var selected_deck_names = JSON.parse(get_from_storage("selected_deck_names"));
         var selected_decks = selected_deck_names.map(function (deck_names) {
             return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
@@ -1459,24 +1478,24 @@ function init() {
         }
     }
 
-    function applyplayers(e) {
+    function apply_players(e) {
         e.preventDefault();
         playerlist.get_selection();
         playerlist.update_global_players();
         write_to_storage("players", JSON.stringify(players));
     }
 
-    function loadplayers() {
+    function load_players() {
         var loaded_players = JSON.parse(get_from_storage("players"));
         playerlist.set_selection(loaded_players);
         playerlist.update_global_players();
 
     }
 
-    applyplayersbtn.onclick = applyplayers;
-    playerinputform.onsubmit = applyplayers;
+    applyplayersbtn.onclick = apply_players;
+    playerinputform.onsubmit = apply_players;
 
-    loadplayersbtn.onclick = loadplayers;
+    loadplayersbtn.onclick = load_players;
 
     window.onresize = refresh_ui.bind(null, visible_ability_decks);
 }
