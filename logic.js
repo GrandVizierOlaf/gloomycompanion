@@ -1015,7 +1015,7 @@ function update_player_init(player) {
 
 function wait_for_modal_close(cb) {
     if (modal_open) {
-        setTimeout(wait_for_modal_close, 300);
+        setTimeout(wait_for_modal_close, 3000, cb);
     } else if (cb) {
         cb();
     }
