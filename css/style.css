@@ -4,7 +4,7 @@ body
     margin:             0;
     overflow-x:         hidden;
 
-    margin-top:         30px;
+    margin-top:         10px;
 }
 
 .nobr
@@ -232,7 +232,6 @@ li.switch a:hover {
 #roundcounter
 {
     margin-left:        2.4em;
-    margin-top:         1em;
     width:              5ch;
     cursor:             pointer;
     z-index:            1;

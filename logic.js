@@ -971,26 +971,37 @@ function update_player_init(player) {
         list_item = document.getElementById("switch-" + player.identifier);
         initiative = document.getElementById("switch-" + player.identifier + "-initiative");
         list_item.classList.remove("switchremoved");
-        var modal_div = document.createElement('form');
-        modal_div.innerText = 'Enter initiative for ' + player.identifier;
+        var modal_form = document.createElement('form');
+        modal_form.id = "modal_form";
+        modal_form.innerText = 'Enter initiative for ' + player.identifier;
         var modal_input = document.createElement('input');
         modal_input.id = 'modal_input_' + player.identifier;
-        modal_input.type = 'number';
-        modal_div.appendChild(modal_input);
+        modal_input.pattern = "\\d{0,2}";
+        modal_form.appendChild(modal_input);
         var modal_submit = document.createElement('input');
         modal_submit.type = "submit";
-        modal_div.appendChild(modal_submit);
+        modal_form.appendChild(modal_submit);
         Modal.open({
             openCallback: function () {
                 modal_open = true;
-                $('#modal_input').keypad({keypadOnly: false, showAnim: '', onClose: function(value, inst) {
-                    console.log(value);
-                    modal_input.value = value;
-                    Modal.close();
-                }});
-                $('#modal_input').keypad('show');
+                $('#modal_input_' + player.identifier).keypad(
+                    {
+                        keypadOnly: false, 
+                        showAnim: '', 
+                        layout: ['123',
+                                '456' + $.keypad.CLEAR,
+                                '789' + $.keypad.BACK,
+                                $.keypad.SPACE + '0'],
+                        onClose: function(value, inst) {
+                            console.log(value);
+                            modal_input.value = value;
+                            Modal.close();
+                        }
+                    }
+                );
+                $('#modal_input_' + player.identifier).keypad('show');
             },
-            content: modal_div.outerHTML,
+            content: modal_form.outerHTML,
             closeCallback: function () {
                 modal_open = false;
                 new_init = modal_input.value;
@@ -999,13 +1010,16 @@ function update_player_init(player) {
                     new_init = "??";
                 }
                 initiative.innerText = " (" + new_init + ")";
+                reorder_switches();
+                write_to_storage("players", JSON.stringify(players));
             }
         });
-        modal_submit.addEventListener("submit", function (e) {
+        modal_form.addEventListener("submit", function (e) {
             e.preventDefault();
             Modal.close();
         });
         wait_for_modal_close();
+        reorder_switches();
         write_to_storage("players", JSON.stringify(players));
 }
 
