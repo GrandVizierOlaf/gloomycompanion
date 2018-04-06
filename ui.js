@@ -70,7 +70,7 @@ function init_ui()
         show_settingspane(settingspane, cancelarea, false);
     }
 
-    activate_tab(tabs, pages, "scenarios");
+    activate_tab(tabs, pages, "players");
 	
 }
 

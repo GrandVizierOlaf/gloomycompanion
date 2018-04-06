@@ -32,22 +32,10 @@
         <div class="panecontainer">
             <div id="settingspane" class="pane expanded">
                 <ul class="tabcontainer">
+                    <li id="playerstab">Players</li>
                     <li id="scenariotab">Scenario</li>
                     <li id="deckstab">Decks</li>
-                    <li id="playerstab">Players</li>
                 </ul>
-                <div id="scenariospage" class="tabbody">
-                    <input id="showmodifierdeck" type="checkbox" checked /><label for="showmodifierdeck">Show Monster Modifier Deck</label>
-                    <br>
-                    <input id="applyscenario" type="button" value="Apply" />
-                    <br>
-                    <input id="applyload" type="button" value="Load Previous Scenario" />
-                    <br>
-                </div>
-                <div id="deckspage" class="tabbody">
-                    <input id="showmodifierdeck-deckspage" type="checkbox" checked /><label for="showmodifierdeck-deckspage">Show Monster Modifier Deck</label>
-                    <input id="applydecks" type="button" value="Apply" />
-                </div>
                 <div id="playerspage" class="tabbody">
                     <div>Enter an identifier for each player. The identifier can be a player name, character name, the character's class, or anything else you'd like.</div>
                     <br/>
@@ -65,6 +53,18 @@
                         <input type="submit" style="display: none" />
                     </form>
                     <input id="loadplayers" type="button" value="Load Previous Players" />
+                </div>
+                <div id="scenariospage" class="tabbody">
+                    <input id="showmodifierdeck" type="checkbox" checked /><label for="showmodifierdeck">Show Monster Modifier Deck</label>
+                    <br>
+                    <input id="applyscenario" type="button" value="Apply" />
+                    <br>
+                    <input id="applyload" type="button" value="Load Previous Scenario" />
+                    <br>
+                </div>
+                <div id="deckspage" class="tabbody">
+                    <input id="showmodifierdeck-deckspage" type="checkbox" checked /><label for="showmodifierdeck-deckspage">Show Monster Modifier Deck</label>
+                    <input id="applydecks" type="button" value="Apply" />
                 </div>
             </div>
             <div id="cancelarea">

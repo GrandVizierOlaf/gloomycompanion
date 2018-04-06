@@ -5,6 +5,7 @@ var do_shuffles = true;
 var all_ability_decks = [];
 var visible_ability_decks = [];
 var players = {};
+var party_level = 1;
 var visible_cards = {};
 var modifier_deck = null;
 var deck_definitions = load_definition(DECK_DEFINITONS);
@@ -947,7 +948,6 @@ function add_player_to_switch_list(player) {
     label.addEventListener("dblclick", function(e){
         label.classList.remove("switchroundover");
         update_player_init(player);
-        reorder_switches();
     }, false);
     list_item.appendChild(label);
     write_to_storage("players", JSON.stringify(players));
@@ -959,75 +959,72 @@ function add_all_players_to_switch_list() {
     }
 }
 
-function wait_for_modal_close() {
-    if (modal_open) {
-        setTimeout(wait_for_modal_close, 1000);
-    } else {
-        return;
-    }
+function update_player_init(player) {
+    list_item = document.getElementById("switch-" + player.identifier);
+    initiative = document.getElementById("switch-" + player.identifier + "-initiative");
+    list_item.classList.remove("switchremoved");
+    var modal_form = document.createElement('form');
+    modal_form.id = "modal_form";
+    modal_form.innerText = 'Enter initiative for ' + player.identifier;
+    var modal_input = document.createElement('input');
+    modal_input.id = 'modal_input_' + player.identifier;
+    modal_input.pattern = "\\d{0,2}";
+    modal_form.appendChild(modal_input);
+    var modal_submit = document.createElement('input');
+    modal_submit.type = "submit";
+    modal_form.appendChild(modal_submit);
+    Modal.open({
+        openCallback: function () {
+            modal_open = true;
+            $('#modal_input_' + player.identifier).keypad(
+                {
+                    keypadOnly: false, 
+                    showAnim: '', 
+                    layout: ['123',
+                            '456' + $.keypad.CLEAR,
+                            '789' + $.keypad.BACK,
+                            $.keypad.SPACE + '0'],
+                    onClose: function(value, inst) {
+                        console.log(value);
+                        modal_input.value = value;
+                        Modal.close();
+                    }
+                }
+            );
+            $('#modal_input_' + player.identifier).keypad('show');
+        },
+        content: modal_form.outerHTML,
+        closeCallback: function () {
+            modal_open = false;
+            new_init = modal_input.value;
+            player.initiative = new_init;
+            if (!new_init) {
+                new_init = "??";
+            }
+            initiative.innerText = " (" + new_init + ")";
+            reorder_switches();
+            write_to_storage("players", JSON.stringify(players));
+        }
+    });
+    modal_form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        Modal.close();
+    });
+    write_to_storage("players", JSON.stringify(players));
 }
 
-function update_player_init(player) {
-        list_item = document.getElementById("switch-" + player.identifier);
-        initiative = document.getElementById("switch-" + player.identifier + "-initiative");
-        list_item.classList.remove("switchremoved");
-        var modal_form = document.createElement('form');
-        modal_form.id = "modal_form";
-        modal_form.innerText = 'Enter initiative for ' + player.identifier;
-        var modal_input = document.createElement('input');
-        modal_input.id = 'modal_input_' + player.identifier;
-        modal_input.pattern = "\\d{0,2}";
-        modal_form.appendChild(modal_input);
-        var modal_submit = document.createElement('input');
-        modal_submit.type = "submit";
-        modal_form.appendChild(modal_submit);
-        Modal.open({
-            openCallback: function () {
-                modal_open = true;
-                $('#modal_input_' + player.identifier).keypad(
-                    {
-                        keypadOnly: false, 
-                        showAnim: '', 
-                        layout: ['123',
-                                '456' + $.keypad.CLEAR,
-                                '789' + $.keypad.BACK,
-                                $.keypad.SPACE + '0'],
-                        onClose: function(value, inst) {
-                            console.log(value);
-                            modal_input.value = value;
-                            Modal.close();
-                        }
-                    }
-                );
-                $('#modal_input_' + player.identifier).keypad('show');
-            },
-            content: modal_form.outerHTML,
-            closeCallback: function () {
-                modal_open = false;
-                new_init = modal_input.value;
-                player.initiative = new_init;
-                if (!new_init) {
-                    new_init = "??";
-                }
-                initiative.innerText = " (" + new_init + ")";
-                reorder_switches();
-                write_to_storage("players", JSON.stringify(players));
-            }
-        });
-        modal_form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            Modal.close();
-        });
-        wait_for_modal_close();
-        reorder_switches();
-        write_to_storage("players", JSON.stringify(players));
+function wait_for_modal_close(cb) {
+    if (modal_open) {
+        setTimeout(wait_for_modal_close, 300);
+    } else if (cb) {
+        cb();
+    }
 }
 
 function update_all_player_inits() {
     for (player_name in players) {
-        update_player_init(players[player_name]);
+        wait_for_modal_close(function () {update_player_init(players[player_name])});
     }
-    reorder_switches();
 }
 
 function add_deck_to_switch_list(deck) {
@@ -1192,7 +1189,7 @@ function add_modifier_deck(container, deck, preserve_discards) {
     deck_space.onclick = draw_modifier_card.bind(null, deck);
 }
 
-function LevelSelector(text, inline) {
+function LevelSelector(text, inline, name) {
     var max_level = 7;
     var level = {};
     level.html = inline ? document.createElement("span") : document.createElement("ul");
@@ -1202,7 +1199,7 @@ function LevelSelector(text, inline) {
     listitem.innerText = text;
     level.html.appendChild(listitem);
 
-    var level_spinner = create_input("number", "scenario_number", "1", "");
+    var level_spinner = create_input("number", "level_selector", "1", "");
     level_spinner.input.min = 0;
     level_spinner.input.max = max_level;
     level.html.appendChild(level_spinner.input);
@@ -1405,6 +1402,24 @@ function PlayerList() {
     return playerlist;
 }
 
+function calculate_party_level() {
+    var levels = Object.keys(players).map(f=>players[f].level);
+
+    var total = 0;
+    for(var i = 0; i < levels.length; i++) {
+        total += parseInt(levels[i], 10);
+    }
+    var avg = total / levels.length;
+
+    party_level = Math.ceil(avg / 2);
+
+    level_selectors = document.getElementsByName("level_selector");
+    for (selector in level_selectors)
+    {
+        level_selectors[selector].value = party_level;
+    }
+}
+
 function load_round_counter() {
     var round_num = get_from_storage("roundnumber");
     if (!round_num) {
@@ -1505,13 +1520,14 @@ function init() {
         playerlist.get_selection();
         playerlist.update_global_players();
         write_to_storage("players", JSON.stringify(players));
+        calculate_party_level();
     }
 
     function load_players() {
         var loaded_players = JSON.parse(get_from_storage("players"));
         playerlist.set_selection(loaded_players);
         playerlist.update_global_players();
-
+        calculate_party_level();
     }
 
     applyplayersbtn.onclick = apply_players;
