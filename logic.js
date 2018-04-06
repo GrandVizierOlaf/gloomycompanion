@@ -1037,12 +1037,20 @@ function add_deck_to_switch_list(deck) {
     label.appendChild(initiative);
     label.addEventListener("click", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
-        if (d.classList.contains("deckroundover")) {
+        if (d.classList.contains("hiddendeck")) {
+            visible_ability_decks.push(deck);
+            list_item.classList.remove("switchremoved");
+            d.classList.remove("hiddendeck");
+            d.classList.remove("deckroundover");
             label.classList.remove("switchroundover");
         } else {
-            label.classList.add("switchroundover");
+            if (d.classList.contains("deckroundover")) {
+                label.classList.remove("switchroundover");
+            } else {
+                label.classList.add("switchroundover");
+            }
+            d.classList.toggle("deckroundover");
         }
-        d.classList.toggle("deckroundover");
     }, false);
     label.addEventListener("dblclick", function(e){
         var d = document.getElementById(this.id.replace("switch-",""));
