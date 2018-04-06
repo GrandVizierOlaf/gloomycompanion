@@ -967,7 +967,7 @@ function update_player_init(player) {
     modal_form.id = "modal_form";
     modal_form.innerText = 'Enter initiative for ' + player.identifier;
     var modal_input = document.createElement('input');
-    modal_input.id = 'modal_input_' + player.identifier;
+    modal_input.id = 'modal_input';
     modal_input.pattern = "\\d{0,2}";
     modal_form.appendChild(modal_input);
     var modal_submit = document.createElement('input');
@@ -976,7 +976,7 @@ function update_player_init(player) {
     Modal.open({
         openCallback: function () {
             modal_open = true;
-            $('#modal_input_' + player.identifier).keypad(
+            $('#modal_input').keypad(
                 {
                     keypadOnly: false, 
                     showAnim: '', 
@@ -991,7 +991,7 @@ function update_player_init(player) {
                     }
                 }
             );
-            $('#modal_input_' + player.identifier).keypad('show');
+            $('#modal_input').keypad('show');
         },
         content: modal_form.outerHTML,
         closeCallback: function () {
@@ -1013,17 +1013,17 @@ function update_player_init(player) {
     write_to_storage("players", JSON.stringify(players));
 }
 
-function wait_for_modal_close(cb) {
+function wait_for_modal_close(cb, arg) {
     if (modal_open) {
-        setTimeout(wait_for_modal_close, 3000, cb);
+        setTimeout(wait_for_modal_close, 300, cb, arg);
     } else if (cb) {
-        cb();
+        cb(arg);
     }
 }
 
 function update_all_player_inits() {
     for (player_name in players) {
-        wait_for_modal_close(function () {update_player_init(players[player_name])});
+        wait_for_modal_close(update_player_init, players[player_name]);
     }
 }
 
