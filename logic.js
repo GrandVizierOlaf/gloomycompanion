@@ -521,9 +521,9 @@ function draw_ability_card(deck) {
 
                 visible_cards[deck.deckid] = card;
 
-                div = document.getElementById("switch-" + deck.deckid + "-initiative");
+                div = document.getElementById("switch-" + visible_deck.deckid + "-initiative");
                 div.innerText = " (" + card.initiative + ")";
-                document.getElementById("switch-" + deck.deckid).classList.remove("switchroundover");
+                document.getElementById("switch-" + visible_deck.deckid).classList.remove("switchroundover");
                 document.getElementById(deck.deckid).classList.remove("deckroundover");
             }
         });
