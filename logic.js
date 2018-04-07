@@ -962,7 +962,6 @@ function add_all_players_to_switch_list() {
 function update_player_init(player) {
     list_item = document.getElementById("switch-" + player.identifier);
     initiative = document.getElementById("switch-" + player.identifier + "-initiative");
-    list_item.classList.remove("switchremoved");
     var modal_form = document.createElement('form');
     modal_form.id = "modal_form";
     modal_form.innerText = 'Enter initiative for ' + player.identifier;
@@ -1000,6 +999,9 @@ function update_player_init(player) {
             player.initiative = new_init;
             if (!new_init) {
                 new_init = "??";
+            } else {
+                list_item.classList.remove("switchremoved");
+                list_item.classList.remove("switchroundover");
             }
             initiative.innerText = " (" + new_init + ")";
             reorder_switches();
@@ -1423,7 +1425,7 @@ function calculate_party_level() {
 function load_round_counter() {
     var round_num = get_from_storage("roundnumber");
     if (!round_num) {
-        round_num = 1;
+        round_num = 0;
     }
     var counter = document.getElementById("roundcounter");
     counter.innerText = round_num;
@@ -1432,7 +1434,7 @@ function load_round_counter() {
 function reset_round_counter() {
     localStorage.removeItem("roundnumber");
     var counter = document.getElementById("roundcounter");
-    counter.innerText = 1;
+    counter.innerText = 0;
 }
 
 function increment_round_counter() {
