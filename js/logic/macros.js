@@ -1,4 +1,4 @@
-import {MACROS} from "../definitions/macros";
+import {MACROS} from "../definitions/macros.js";
 
 export function expandMacro(macro) {
     let key = macro.toLowerCase();

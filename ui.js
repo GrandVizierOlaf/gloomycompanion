@@ -3,7 +3,7 @@
 import {incrementRoundCounter} from './js/logic/rounds.js';
 import {updateAllPlayerInits} from "./js/logic/players.js";
 import {drawAllVisibleAbilityCards} from "./js/logic/decks.js";
-import {endRound} from "./js/logic/rounds";
+import {endRound} from "./js/logic/rounds.js";
 
 function activateTab(tabs, pages, activetab)
 {
@@ -95,6 +95,7 @@ if(window.attachEvent) {
     }
 }
 
+// This should be dynamic dependant on lines per card
 export function refreshUi() {
     let actualCardHeight = 296;
     let baseFontSize = 26.6;

@@ -1,5 +1,5 @@
-import {reshuffleModifierDeck} from "./decks";
-import {getFromStorage, writeToStorage} from "./util";
+import {reshuffleModifierDeck} from "./decks.js";
+import {getFromStorage, writeToStorage} from "./util.js";
 
 export function endRound() {
     if (window.modifierDeck && window.modifierDeck.shuffleEndOfRound()) {

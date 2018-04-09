@@ -1,4 +1,4 @@
-import {MONSTER_STATS} from "../definitions/monster_stats";
+import {MONSTER_STATS} from "../definitions/monster_stats.js";
 
 export function getMonsterStats(name, level) {
     let attack = [MONSTER_STATS["monsters"][name]["level"][level]["normal"]["attack"],

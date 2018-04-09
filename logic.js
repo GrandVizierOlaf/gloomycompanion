@@ -2,6 +2,7 @@
 
 import {DECKS} from './js/definitions/cards.js';
 import {SCENARIO_DEFINITIONS, SPECIAL_RULES} from './js/definitions/scenarios.js';
+
 import {
     concatArrays,
     createInput,
@@ -13,8 +14,9 @@ import {
 } from './js/logic/util.js';
 import {addPlayer} from "./js/logic/players.js";
 import {applyDeckSelection, loadAbilityDeck} from "./js/logic/decks.js";
-import {loadRoundCounter, resetRoundCounter} from "./js/logic/rounds";
-import {refreshUi} from "./ui";
+import {loadRoundCounter, resetRoundCounter} from "./js/logic/rounds.js";
+import {refreshUi} from "./ui.js";
+import {calculatePartyLevel} from "./js/logic/players.js";
 
 //TODO Adding an extra Guard deck will reshuffle the first one,
 // End of round with multiple Archers, resize text, worth to show common and elite_only attributes?,
@@ -25,8 +27,6 @@ window.players = {};
 window.partyLevel = 1;
 window.visibleCards = {};
 window.modifierDeck = null;
-
-// This should be dynamic dependant on lines per card
 
 function LevelSelector(text, inline) {
     let maxLevel = 7;
@@ -242,25 +242,6 @@ function PlayerList() {
     };
 
     return playerList;
-}
-
-function calculatePartyLevel() {
-    let levels = Object.keys(window.players).map(f => window.players[f].level);
-
-    let total = 0;
-    for (let i = 0; i < levels.length; i++) {
-        total += parseInt(levels[i], 10);
-    }
-    let avg = total / levels.length;
-
-    window.partyLevel = Math.ceil(avg / 2);
-
-    let levelSelectors = document.getElementsByName("levelSelector");
-    for (let selector in levelSelectors) {
-        if (levelSelectors.hasOwnProperty(selector)) {
-            levelSelectors[selector].value = window.partyLevel;
-        }
-    }
 }
 
 function init() {

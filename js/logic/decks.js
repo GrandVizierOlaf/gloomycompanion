@@ -1,15 +1,15 @@
-import {findInDiscard, getFromStorage, removeChild, shuffleList, writeToStorage} from "./util.js";
+import {DECKS, DECK_DEFINITIONS} from "../definitions/cards.js";
 import {CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK} from "../definitions/modifiers.js";
+
+import {findInDiscard, getFromStorage, removeChild, shuffleList, writeToStorage} from "./util.js";
 import {refreshUi} from "../../ui.js";
 import {addAllPlayersToSwitchList, addDeckToSwitchList, reorderSwitches, updateSwitchInitiative} from "./switches.js";
 import {defineModifierCard, createAbilityCardBack, createAbilityCardFront, UICard} from "./cards.js";
 import {specialToLines} from "./macros.js";
 import {getBossStats} from "./monster_stats.js";
-import {DECK_DEFINITIONS} from "../definitions/cards.js";
-import {DECKS} from "../definitions/cards";
-import {endRound} from "./rounds";
-import {attributesToLines, immunitiesToLines, notesToLines} from "./macros";
-import {getMonsterStats} from "./monster_stats";
+import {endRound} from "./rounds.js";
+import {attributesToLines, immunitiesToLines, notesToLines} from "./macros.js";
+import {getMonsterStats} from "./monster_stats.js";
 
 export const DECK_TYPES =
     {

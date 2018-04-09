@@ -86,3 +86,22 @@ function waitForModalClose(cb, arg) {
         cb(arg);
     }
 }
+
+export function calculatePartyLevel() {
+    let levels = Object.keys(window.players).map(f => window.players[f].level);
+
+    let total = 0;
+    for (let i = 0; i < levels.length; i++) {
+        total += parseInt(levels[i], 10);
+    }
+    let avg = total / levels.length;
+
+    window.partyLevel = Math.ceil(avg / 2);
+
+    let levelSelectors = document.getElementsByName("levelSelector");
+    for (let selector in levelSelectors) {
+        if (levelSelectors.hasOwnProperty(selector)) {
+            levelSelectors[selector].value = window.partyLevel;
+        }
+    }
+}
