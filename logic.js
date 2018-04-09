@@ -1,5 +1,30 @@
 "use strict";
 
+import {
+    shuffleList, toggleClass, createButton, concatArrays, createInput, dictValues, findInDiscard, getFromStorage,
+    inputValue, isChecked, removeChild, removeEmptyStrings, writeToStorage
+} from './util.js';
+
+import {
+    attributesToLines, expandString, immunitiesToLines, notesToLines, specialToLines
+} from './macros.js';
+
+import {
+    DECKS, DECK_DEFINITIONS
+} from './cards.js';
+
+import {
+    CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK
+} from './modifiers.js';
+
+import {
+    MONSTER_STATS, SPECIAL_VALUES
+} from './monster_stats.js';
+
+import {
+    SCENARIO_DEFINITIONS, SPECIAL_RULES
+} from './scenarios.js';
+
 //TODO Adding an extra Guard deck will reshuffle the first one,
 // End of round with multiple Archers, resize text, worth to show common and elite_only attributes?,
 // shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
@@ -47,7 +72,7 @@ function reorderSwitches() {
     let switches = document.getElementById("switcheslist");
     let items = switches.childNodes;
 
-    items = items.filter(function (item) {
+    items = Array.from(items).filter(function (item) {
         return item.nodeType === 1;
     });
 
@@ -269,8 +294,8 @@ function loadAbilityDeck(deckClass, deckName, level) {
         };
 
         card.paintFrontCard = function (name, lines, attack, move, range, level, health) {
-            this.ui.front = createAbilityCardFront(this.initiative, name, this.shuffleNext, lines, attack, move, 
-                                                   range, level, health);
+            this.ui.front = createAbilityCardFront(this.initiative, name, this.shuffleNext, lines, attack, move,
+                range, level, health);
         };
 
         if (loadedDeck && findInDiscard(loadedDeck.discard, card.id)) {
@@ -508,7 +533,7 @@ function sendToDiscard(card, pullAnimation) {
     card.ui.addClass("discard");
 }
 
-function drawAllVisibleAbilityCards() {
+export function drawAllVisibleAbilityCards() {
     visibleAbilityDecks.forEach(function (visibleDeck) {
         drawAbilityCard(visibleDeck);
     });
@@ -706,7 +731,7 @@ function loadModifierDeck() {
     }.bind(deck);
     let loadedDeck = JSON.parse(getFromStorage("modifierDeck"));
 
-    MODIFIERDeck.forEach(function (cardDefinition) {
+    MODIFIER_DECK.forEach(function (cardDefinition) {
         let card = defineModifierCard(cardDefinition);
         if (loadedDeck && findInDiscardAndRemove(loadedDeck.discard, card.cardType)) {
             deck.discard.push(card);
@@ -759,7 +784,7 @@ function defineModifierCard(cardDefinition) {
     return card;
 }
 
-function endRound() {
+export function endRound() {
     if (modifierDeck && modifierDeck.shuffleEndOfRound()) {
         modifierDeck.cleanAdvantageDeck();
         reshuffleModifierDeck(modifierDeck);
@@ -997,7 +1022,6 @@ function updatePlayerInit(player) {
         },
         content: modalForm.outerHTML,
         closeCallback: function () {
-            modalOpen = false;
             let newInit = modalInput.value;
             player.initiative = newInit;
             if (!newInit) {
@@ -1009,6 +1033,7 @@ function updatePlayerInit(player) {
             initiative.innerText = " (" + newInit + ")";
             reorderSwitches();
             writeToStorage("players", JSON.stringify(players));
+            modalOpen = false;
         }
     });
     modalForm.addEventListener("submit", function (e) {
@@ -1020,13 +1045,13 @@ function updatePlayerInit(player) {
 
 function waitForModalClose(cb, arg) {
     if (modalOpen) {
-        setTimeout(waitForModalClose, 300, cb, arg);
+        setTimeout(waitForModalClose, 100, cb, arg);
     } else if (cb) {
         cb(arg);
     }
 }
 
-function updateAllPlayerInits() {
+export function updateAllPlayerInits() {
     for (let playerName in players) {
         if (players.hasOwnProperty(playerName)) {
             waitForModalClose(updatePlayerInit, players[playerName]);
@@ -1450,7 +1475,7 @@ function resetRoundCounter() {
     counter.innerText = "0";
 }
 
-function incrementRoundCounter() {
+export function incrementRoundCounter() {
     let counter = document.getElementById("roundcounter");
     counter.innerText++;
     writeToStorage("roundnumber", counter.innerText);
@@ -1549,4 +1574,18 @@ function init() {
     loadPlayersBtn.onclick = loadPlayers;
 
     window.onresize = refreshUi.bind(null, visibleAbilityDecks);
+}
+
+if(window.attachEvent) {
+    window.attachEvent('onload', init);
+} else {
+    if(window.onload) {
+        let curronload = window.onload;
+        window.onload = function (evt) {
+            curronload(evt);
+            init(evt);
+        };
+    } else {
+        window.onload = init;
+    }
 }

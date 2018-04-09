@@ -15,20 +15,20 @@
         <meta name="apple-mobile-web-app-title" content="Gloomy Companion" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script type="text/javascript" src="util.js"></script>
-        <script type="text/javascript" src="cards.js"></script>
-        <script type="text/javascript" src="scenarios.js"></script>
-        <script type="text/javascript" src="macros.js"></script>
-        <script type="text/javascript" src="modifiers.js"></script>
-        <script type="text/javascript" src="monster_stats.js"></script>
-        <script type="text/javascript" src="logic.js"></script>
-        <script type="text/javascript" src="ui.js"></script>
+        <script type="module" src="util.js"></script>
+        <script type="module" src="cards.js"></script>
+        <script type="module" src="scenarios.js"></script>
+        <script type="module" src="macros.js"></script>
+        <script type="module" src="modifiers.js"></script>
+        <script type="module" src="monster_stats.js"></script>
+        <script type="module" src="./logic.js"></script>
+        <script type="module" src="./ui.js"></script>
         <script type="text/javascript" src="lib/jsmodal-1.0d.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script type="text/javascript" src="lib/jquery.plugin.min.js"></script> 
         <script type="text/javascript" src="lib/jquery.keypad.min.js"></script>
     </head>
-    <body onload="init(); init_ui();">
+    <body>
         <div class="panecontainer">
             <div id="settingspane" class="pane expanded">
                 <ul class="tabcontainer">

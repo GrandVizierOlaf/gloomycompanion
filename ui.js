@@ -1,78 +1,98 @@
+"use strict";
 
+import {
+    drawAllVisibleAbilityCards,
+    updateAllPlayerInits,
+    incrementRoundCounter,
+    endRound
+} from './logic.js';
 
-function activate_tab(tabs, pages, activetab)
+function activateTab(tabs, pages, activetab)
 {
-    for (key in tabs)
+    for (let key in tabs)
     {
-        tabs[key].className = (key == activetab) ? "" : "inactive";
+        tabs[key].className = (key === activetab) ? "" : "inactive";
     }
-    for (key in pages)
+    for (let key in pages)
     {
-        pages[key].className = (key == activetab) ? "tabbody" : "inactive tabbody";
+        pages[key].className = (key === activetab) ? "tabbody" : "inactive tabbody";
     }
 }
 
-function show_settingspane(pane, cancelarea, show)
+function showSettingsPane(pane, cancelarea, show)
 {
     pane.className = show ? "pane" : "pane inactive";
     cancelarea.style.display = show ? "initial" : "none";
 }
 
-function init_ui()
+function initUi()
 {
-    var tabs =
+    let tabs =
     {
         scenarios:      document.getElementById("scenariotab"),
         decks:          document.getElementById("deckstab"),
         players:        document.getElementById("playerstab")
     };
-    var pages =
+    let pages =
     {
         scenarios:      document.getElementById("scenariospage"),
         decks:          document.getElementById("deckspage"),
         players:        document.getElementById("playerspage")
     };
 
-    settingspane =      document.getElementById("settingspane");
-    settingsbtn =       document.getElementById("settingsbtn");
-    newroundbtn =       document.getElementById("newroundbtn");
-    cancelarea =        document.getElementById("cancelarea");
+    let settingspane =      document.getElementById("settingspane");
+    let settingsbtn =       document.getElementById("settingsbtn");
+    let newroundbtn =       document.getElementById("newroundbtn");
+    let cancelarea =        document.getElementById("cancelarea");
 
-    scenariotab.onclick = function(e)
+    tabs.scenarios.onclick = function()
     {
-        activate_tab(tabs, pages, "scenarios");
-    }
+        activateTab(tabs, pages, "scenarios");
+    };
 
-    deckstab.onclick = function(e)
+    tabs.decks.onclick = function()
     {
-        activate_tab(tabs, pages, "decks");
-    }
+        activateTab(tabs, pages, "decks");
+    };
 
-    playerstab.onclick = function(e)
+    tabs.players.onclick = function()
     {
-        activate_tab(tabs, pages, "players");
-    }
+        activateTab(tabs, pages, "players");
+    };
 
-    settingsbtn.onclick = function(e)
+    settingsbtn.onclick = function()
     {
-        show_settingspane(settingspane, cancelarea, true);
-    }
+        showSettingsPane(settingspane, cancelarea, true);
+    };
 
-    newroundbtn.onclick = function(e)
+    newroundbtn.onclick = function()
     {
         drawAllVisibleAbilityCards();
         updateAllPlayerInits();
         incrementRoundCounter();
         
         endRound();
-    }
+    };
 
-    cancelarea.onclick = function(e)
+    cancelarea.onclick = function()
     {
-        show_settingspane(settingspane, cancelarea, false);
-    }
+        showSettingsPane(settingspane, cancelarea, false);
+    };
 
-    activate_tab(tabs, pages, "players");
+    activateTab(tabs, pages, "players");
 	
 }
 
+if(window.attachEvent) {
+    window.attachEvent('onload', initUi);
+} else {
+    if(window.onload) {
+        let curronload = window.onload;
+        window.onload = function (evt) {
+            curronload(evt);
+            initUi(evt);
+        };
+    } else {
+        window.onload = initUi;
+    }
+}

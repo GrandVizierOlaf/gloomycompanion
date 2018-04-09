@@ -1,5 +1,4 @@
-
-function shuffleList(l)
+export function shuffleList(l)
 {
     for (let i = 0; i < l.length-1; i++)
     {
@@ -11,7 +10,7 @@ function shuffleList(l)
     }
 }
 
-function toggleClass(element, className, enableClass)
+export function toggleClass(element, className, enableClass)
 {
     if (enableClass)
     {
@@ -23,7 +22,7 @@ function toggleClass(element, className, enableClass)
     }
 }
 
-function removeChild(myNode)
+export function removeChild(myNode)
 {
     while (myNode.firstChild)
     {
@@ -31,7 +30,7 @@ function removeChild(myNode)
     }
 }
 
-function createInput(type, name, value, text)
+export function createInput(type, name, value, text)
 {
     let input = document.createElement("input");
     input.type = type;
@@ -47,7 +46,7 @@ function createInput(type, name, value, text)
     return {'root': label, 'input': input};
 }
 
-function createButton(type, id, value)
+export function createButton(type, id, value)
 {
     let button = document.createElement("input");
     button.type = type;
@@ -57,7 +56,7 @@ function createButton(type, id, value)
     return button;
 }
 
-function dictValues(dict)
+export function dictValues(dict)
 {
     let values = [];
     for (key in dict) {
@@ -67,36 +66,36 @@ function dictValues(dict)
     return values;
 }
 
-function concatArrays(arrays)
+export function concatArrays(arrays)
 {
     return Array.prototype.concat.apply([], arrays);
 }
 
-function isChecked(input)
+export function isChecked(input)
 {
     return (('checked' in input) ? input.checked : false);
 }
 
-function inputValue(input)
+export function inputValue(input)
 {
     return (('value' in input) ? input.value : '');
 }
 
-function removeEmptyStrings(array)
+export function removeEmptyStrings(array)
 {
     return array.filter(Boolean);
 }
 
-function writeToStorage(name, value) {
+export function writeToStorage(name, value) {
     localStorage.setItem(name, value);
     console.log("Wrote " + name + " to local storage, with value: " + value);
 }
 
-function getFromStorage(name) {
+export function getFromStorage(name) {
     return localStorage.getItem(name);
 }
 
-function findInDiscard(discard, id) {
+export function findInDiscard(discard, id) {
     for (let i=0; i < discard.length; i++) {
         if (discard[i].id === id) {
             return discard[i];
