@@ -1,11 +1,8 @@
 "use strict";
 
-import {
-    drawAllVisibleAbilityCards,
-    updateAllPlayerInits,
-    incrementRoundCounter,
-    endRound
-} from './logic.js';
+import {incrementRoundCounter,endRound} from './logic.js';
+import {updateAllPlayerInits} from "./js/logic/players.js";
+import {drawAllVisibleAbilityCards} from "./js/logic/decks.js";
 
 function activateTab(tabs, pages, activetab)
 {
