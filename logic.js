@@ -171,7 +171,7 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
 
     if (shuffle) {
         var shuffle_img = document.createElement("img");
-        shuffle_img.src = "../images/shuffle.svg";
+        shuffle_img.src = "images/shuffle.svg";
         card.appendChild(shuffle_img);
     }
 
