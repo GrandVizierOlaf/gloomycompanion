@@ -768,7 +768,7 @@ function define_modifier_card(card_definition) {
 }
 
 function end_round() {
-    if (modifier_deck.shuffle_end_of_round()) {
+    if (modifier_deck && modifier_deck.shuffle_end_of_round()) {
         modifier_deck.clean_advantage_deck();
         reshuffle_modifier_deck(modifier_deck);
     }
