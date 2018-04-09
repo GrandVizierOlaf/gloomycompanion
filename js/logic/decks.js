@@ -3,7 +3,13 @@ import {CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK} from "../definitions
 
 import {findInDiscard, getFromStorage, removeChild, shuffleList, writeToStorage} from "./util.js";
 import {refreshUi} from "../../ui.js";
-import {addAllPlayersToSwitchList, addDeckToSwitchList, reorderSwitches, updateSwitchInitiative} from "./switches.js";
+import {
+    addAllPlayersToSwitchList,
+    addDeckToSwitchList,
+    removeDeckFromSwitchList,
+    reorderSwitches,
+    updateSwitchInitiative
+} from "./switches.js";
 import {defineModifierCard, createAbilityCardBack, createAbilityCardFront, UICard} from "./cards.js";
 import {specialToLines} from "./macros.js";
 import {getBossStats} from "./monster_stats.js";
@@ -435,9 +441,9 @@ function findInDiscardAndRemove(discard, cardType) {
 export function applyDeckSelection(decks, preserveExistingDeckState) {
     let container = document.getElementById("tableau");
 
-    let decksToRemove = window.visibleAbilityDecks.filter(function (visibleDeck) {
+    let decksToRemove = allAbilityDecks.filter(function (abilityDeck) {
         return !preserveExistingDeckState || (decks.filter(function (deck) {
-            return ((deck.name === visibleDeck.name) && (deck.level === visibleDeck.level));
+            return ((deck.name === abilityDeck.name) && (deck.level === abilityDeck.level));
         }).length === 0);
     });
 
@@ -463,7 +469,7 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
             window.modifierDeck.drawTopDiscard();
 
             document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED,
-                                        {detail: {shuffle: window.modifierDeck.shuffleEndOfRound()}}));
+                {detail: {shuffle: window.modifierDeck.shuffleEndOfRound()}}));
         }
     }
     else if (!preserveExistingDeckState) {
@@ -474,6 +480,7 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
     writeToStorage("modifierDeck", JSON.stringify(window.modifierDeck));
 
     decksToRemove.forEach(function (deck) {
+        removeDeckFromSwitchList(deck);
         deck.discardDeck();
     });
 
@@ -495,10 +502,16 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
         deckSpace.onclick = drawAbilityCard.bind(null, deck);
 
         deck.discardDeck = function () {
-            let index = window.visibleAbilityDecks.indexOf(this);
+            let visIndex = window.visibleAbilityDecks.indexOf(this);
+
+            if (visIndex > -1) {
+                window.visibleAbilityDecks.splice(visIndex, 1);
+            }
+
+            let index = allAbilityDecks.indexOf(this);
 
             if (index > -1) {
-                window.visibleAbilityDecks.splice(index, 1);
+                allAbilityDecks.splice(index, 1);
             }
 
             container.removeChild(deckSpace);
@@ -513,10 +526,10 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
             deck.setStatsMonster(getMonsterStats(deck.getRealName(), deck.level));
 
         }
-        reshuffle(deck);
         if (preserveExistingDeckState) {
-            deck.drawTopDiscard();
+            //deck.drawTopDiscard();
         } else {
+            reshuffle(deck);
             forceRepaintDeck(deck);
         }
         allAbilityDecks.push(deck);
@@ -596,14 +609,6 @@ function addModifierDeck(container, deck, preserveDiscards) {
     buttonDiv.appendChild(createCounter("bless", deck.addCard, deck.removeCard));
     buttonDiv.appendChild(createCounter("curse", deck.addCard, deck.removeCard));
 
-    let endRoundDiv = document.createElement("div");
-    endRoundDiv.className = "counter-icon shuffle not-required";
-    endRoundDiv.onclick = endRound;
-
-    document.body.addEventListener(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, indicateShuffleRequired);
-
-    buttonDiv.appendChild(endRoundDiv);
-
     let deckColumn = document.createElement("div");
     deckColumn.className = "modifier-deck-column-2";
 
@@ -655,7 +660,6 @@ function flipUpTopCard(deck) {
     sendToDiscard(card, true);
     deck.discard.unshift(card);
 
-    updateSwitchInitiative(deck.deckid, card.initiative);
     return card;
 }
 

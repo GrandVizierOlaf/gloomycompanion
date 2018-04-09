@@ -59,7 +59,7 @@ export function createButton(type, id, value)
 export function dictValues(dict)
 {
     let values = [];
-    for (key in dict) {
+    for (let key in dict) {
         values.push(dict[key]);
     }
     

@@ -17,6 +17,7 @@ import {applyDeckSelection, loadAbilityDeck} from "./js/logic/decks.js";
 import {loadRoundCounter, resetRoundCounter} from "./js/logic/rounds.js";
 import {refreshUi} from "./ui.js";
 import {calculatePartyLevel} from "./js/logic/players.js";
+import {addAllPlayersToSwitchList} from "./js/logic/switches.js";
 
 //TODO Adding an extra Guard deck will reshuffle the first one,
 // End of round with multiple Archers, resize text, worth to show common and elite_only attributes?,
@@ -304,10 +305,12 @@ function init() {
         loadPlayers();
         loadRoundCounter();
         let selectedDeckNames = JSON.parse(getFromStorage("selectedDeckNames"));
-        let selectedDecks = selectedDeckNames.map(function (deckNames) {
-            return loadAbilityDeck(deckNames.class, deckNames.name, deckNames.level);
-        });
-        applyDeckSelection(selectedDecks, true);
+        if (selectedDeckNames) {
+            let selectedDecks = selectedDeckNames.map(function (deckNames) {
+                return loadAbilityDeck(deckNames.class, deckNames.name, deckNames.level);
+            });
+            applyDeckSelection(selectedDecks, true);
+        }
         let modifierDeckSection = document.getElementById("modifier-container");
         if (!showModifierCode.checked) {
             modifierDeckSection.style.display = "none";
@@ -322,6 +325,7 @@ function init() {
         playerList.getSelection();
         playerList.updateGlobalPlayers();
         writeToStorage("players", JSON.stringify(window.players));
+        addAllPlayersToSwitchList();
         calculatePartyLevel();
     }
 

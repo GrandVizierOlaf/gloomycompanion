@@ -52,10 +52,10 @@ export function addPlayerToSwitchList(player) {
         return;
     }
 
-    let switcheslist = document.getElementById("switcheslist");
+    let switchesList = document.getElementById("switcheslist");
     let listItem = document.createElement("li");
     listItem.className = "switch noselect player";
-    switcheslist.appendChild(listItem);
+    switchesList.appendChild(listItem);
     let label = document.createElement("a");
     label.id = "switch-" + player.identifier;
     label.innerText = player.identifier;
@@ -78,7 +78,26 @@ export function addPlayerToSwitchList(player) {
     writeToStorage("players", JSON.stringify(window.players));
 }
 
+export function removePlayerFromSwitchList(player) {
+    let div = document.getElementById("switch-" + player.identifier);
+
+    if (div) {
+        let switchesList = document.getElementById("switcheslist");
+        switchesList.removeChild(div.parentNode);
+    }
+}
+
 export function addAllPlayersToSwitchList() {
+    let switchesList = document.getElementById("switcheslist");
+
+    // Remove all existing player switches
+    switchesList.childNodes.forEach(function (childNode) {
+        if (childNode.classList && childNode.classList.contains("player")) {
+            switchesList.removeChild(childNode);
+        }
+    });
+
+
     for (let playerName in window.players) {
         if (window.players.hasOwnProperty(playerName)) {
             addPlayerToSwitchList(window.players[playerName]);
@@ -144,4 +163,13 @@ export function addDeckToSwitchList(deck) {
         d.classList.remove("hoveredswitch");
     }, false);
     listItem.appendChild(label);
+}
+
+export function removeDeckFromSwitchList(deck) {
+    let div = document.getElementById("switch-" + deck.deckid);
+
+    if (div) {
+        let switchesList = document.getElementById("switcheslist");
+        switchesList.removeChild(div.parentNode);
+    }
 }
