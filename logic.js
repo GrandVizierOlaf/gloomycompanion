@@ -3,38 +3,36 @@
 //TODO Adding an extra Guard deck will reshuffle the first one,
 // End of round with multiple Archers, resize text, worth to show common and elite_only attributes?,
 // shield and retaliate only when shown (apparently, attributes are active at the beginning of the turn, and active after initiative)
-let do_shuffles = true;
-let all_ability_decks = [];
-let visible_ability_decks = [];
+let doShuffles = true;
+let allAbilityDecks = [];
+let visibleAbilityDecks = [];
 let players = {};
-let party_level = 1;
-let visible_cards = {};
-let modifier_deck = null;
-let deck_definitions = load_definition(DECK_DEFINITONS);
-let modal_open = false;
+let partyLevel = 1;
+let visibleCards = {};
+let modifierDeck = null;
+let deckDefinitions = loadDefinition(DECK_DEFINITIONS);
+let modalOpen = false;
 
-let DECK_TYPES =
+const DECK_TYPES =
     {
         MODIFIER: "modifier",
         ABILITY: "ability",
         BOSS: "boss"
     };
 
-let EVENT_NAMES = {
+const EVENT_NAMES = {
     MODIFIER_CARD_DRAWN: "modifierCardDrawn",
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modifierDeckShuffleRequired"
 };
 
-function update_switch_initiative(deck_id, initiative) {
-    let div = document.getElementById("switch-" + deck_id + "-initiative");
+function updateSwitchInitiative(deckId, initiative) {
+    let div = document.getElementById("switch-" + deckId + "-initiative");
     div.innerText = " (" + initiative + ")";
-    document.getElementById("switch-" + deck_id).classList.remove("switchroundover");
-    document.getElementById(deck_id).classList.remove("deckroundover");
+    document.getElementById("switch-" + deckId).classList.remove("switchroundover");
+    document.getElementById(deckId).classList.remove("deckroundover");
 }
 
-function add_player(identifier, level, initiative = null) {
-    if (!player) return;
-
+function addPlayer(identifier, level, initiative = null) {
     let character = {
         initiative: initiative,
         level: level,
@@ -42,82 +40,79 @@ function add_player(identifier, level, initiative = null) {
     };
 
     players[identifier] = character;
-    add_player_to_switch_list(character);
+    addPlayerToSwitchList(character);
 }
 
-function reorder_switches() {
+function reorderSwitches() {
     let switches = document.getElementById("switcheslist");
     let items = switches.childNodes;
-    let itemsArr = [];
 
-    for (let i in items) {
-        if (items[i].nodeType == 1) { // get rid of the whitespace text nodes
-            itemsArr.push(items[i]);
-        }
-    }
+    items = items.filter(function (item) {
+        return item.nodeType === 1;
+    });
 
-    itemsArr.sort(function (a, b) {
-        let a_init = parseInt(a.textContent.replace(/\D+/g, '')) || 100;
-        let b_init = parseInt(b.textContent.replace(/\D+/g, '')) || 100;
+    items.sort(function (a, b) {
+        let aInit = parseInt(a.textContent.replace(/\D+/g, "")) || 100;
+        let bInit = parseInt(b.textContent.replace(/\D+/g, "")) || 100;
 
-        let a_is_player = a.classList.contains("player");
-        let b_is_player = b.classList.contains("player");
+        let aIsPlayer = a.classList.contains("player");
+        let bIsPlayer = b.classList.contains("player");
 
-        if (a_init == b_init) {
-            if (a_is_player && !b_is_player) {
+        if (aInit === bInit) {
+            if (aIsPlayer && !bIsPlayer) {
                 return -1;
-            } else if (!a_is_player && b_is_player) {
+            } else if (!aIsPlayer && bIsPlayer) {
                 return 1;
-            } else if (a_is_player && b_is_player) {
+            } else if (aIsPlayer && bIsPlayer) {
                 // TODO: Get second card values
                 return 0;
             } else {
                 return 0;
             }
-        } else if (a_init > b_init) {
+        } else if (aInit > bInit) {
             return 1;
-        } else if (a_init < b_init) {
+        } else if (aInit < bInit) {
             return -1;
         }
     });
 
-    for (let i = 0; i < itemsArr.length; ++i) {
-        switches.appendChild(itemsArr[i]);
+    for (let i = 0; i < items.length; ++i) {
+        switches.appendChild(items[i]);
     }
 }
 
-function UICard(front_element, back_element) {
+function UICard(frontElement, backElement) {
     let card = {};
 
-    card.back = back_element;
-    card.front = front_element;
+    card.back = backElement;
+    card.front = frontElement;
 
-    card.flip_up = function (faceup) {
-        toggle_class(this.back, "up", !faceup);
-        toggle_class(this.back, "down", faceup);
+    card.flipUp = function (faceup) {
+        toggleClass(this.back, "up", !faceup);
+        toggleClass(this.back, "down", faceup);
 
-        toggle_class(this.front, "up", faceup);
-        toggle_class(this.front, "down", !faceup);
+        toggleClass(this.front, "up", faceup);
+        toggleClass(this.front, "down", !faceup);
     };
 
-    card.set_depth = function (z) {
+    card.setDepth = function (z) {
         this.back.style.zIndex = z;
         this.front.style.zIndex = z;
     };
 
-    card.push_down = function () {
+    card.pushDown = function () {
         this.back.style.zIndex -= 1;
         this.front.style.zIndex -= 1;
     };
 
-    card.addClass = function (class_name) {
-        this.front.classList.add(class_name);
-        this.back.classList.add(class_name);
+    card.addClass = function (className) {
+        this.front.classList.add(className);
+        this.back.classList.add(className);
     };
 
-    card.removeClass = function (class_name) {
-        this.front.classList.remove(class_name);
-        this.back.classList.remove(class_name);
+    card.removeClass = function (className) {
+        this.front.classList.remove(className);
+        this.back.classList.remove(className);
     };
 
     card.attach = function (parent) {
@@ -125,70 +120,70 @@ function UICard(front_element, back_element) {
         parent.appendChild(this.front);
     };
 
-    card.flip_up(false);
+    card.flipUp(false);
 
     return card;
 }
 
-function create_ability_card_back(name, level) {
+function createAbilityCardBack(name, level) {
     let card = document.createElement("div");
     card.className = "card ability back down";
 
-    let name_span = document.createElement("span");
-    name_span.className = "name";
-    name_span.innerText = name + "-" + level;
-    card.appendChild(name_span);
+    let nameSpan = document.createElement("span");
+    nameSpan.className = "name";
+    nameSpan.innerText = name + "-" + level;
+    card.appendChild(nameSpan);
 
     return card;
 }
 
-function create_ability_card_front(initiative, name, shuffle, lines, attack, move, range, level, health) {
+function createAbilityCardFront(initiative, name, shuffle, lines, attack, move, range, level, health) {
     let card = document.createElement("div");
     card.className = "card ability front down";
 
-    let name_span = document.createElement("span");
-    name_span.className = "name";
-    name_span.innerText = name + "-" + level;
-    card.appendChild(name_span);
+    let nameSpan = document.createElement("span");
+    nameSpan.className = "name";
+    nameSpan.innerText = name + "-" + level;
+    card.appendChild(nameSpan);
 
-    let healthNormal_span = document.createElement("span");
-    healthNormal_span.className = "healthNormal";
-    healthNormal_span.innerText = "HP " + health[0];
-    card.appendChild(healthNormal_span);
+    let healthNormalSpan = document.createElement("span");
+    healthNormalSpan.className = "healthNormal";
+    healthNormalSpan.innerText = "HP " + health[0];
+    card.appendChild(healthNormalSpan);
 
     if (health[1] > 0) {
-        let healthElite_span = document.createElement("span");
-        healthElite_span.className = "healthElite";
-        healthElite_span.innerText = "HP " + health[1];
-        card.appendChild(healthElite_span);
+        let healthEliteSpan = document.createElement("span");
+        healthEliteSpan.className = "healthElite";
+        healthEliteSpan.innerText = "HP " + health[1];
+        card.appendChild(healthEliteSpan);
     }
 
-    let initiative_span = document.createElement("span");
-    initiative_span.className = "initiative";
-    initiative_span.innerText = initiative;
-    card.appendChild(initiative_span);
+    let initiativeSpan = document.createElement("span");
+    initiativeSpan.className = "initiative";
+    initiativeSpan.innerText = initiative;
+    card.appendChild(initiativeSpan);
 
     if (shuffle) {
-        let shuffle_img = document.createElement("img");
-        shuffle_img.src = "images/shuffle.svg";
-        card.appendChild(shuffle_img);
+        let shuffleImg = document.createElement("img");
+        shuffleImg.src = "images/shuffle.svg";
+        card.appendChild(shuffleImg);
     }
 
-    let current_depth = 0;
-    let current_parent = card;
+    let currentDepth = 0;
+    let currentParent = card;
 
-    lines = remove_empty_strings(lines);
+    lines = removeEmptyStrings(lines);
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
 
-        let new_depth = 0;
+        let newDepth = 0;
         while (line.indexOf("*") >= 0) {
-            new_depth += 1;
+            newDepth += 1;
             line = line.substr(1);
         }
-        let diff = new_depth - current_depth;
+        let diff = newDepth - currentDepth;
 
-        while (current_depth != new_depth) {
+        while (currentDepth !== newDepth) {
             if (diff > 0) {
                 // Need one level lower, create <ul>
                 let list = document.createElement("ul");
@@ -196,169 +191,170 @@ function create_ability_card_front(initiative, name, shuffle, lines, attack, mov
                 if (lines.length > 5) {
                     list.style.fontSize = (100 - (lines.length * 2.5)) + "%";
                 }
-                current_parent.appendChild(list);
-                current_parent = list;
+                currentParent.appendChild(list);
+                currentParent = list;
 
                 // Create <li>
-                let list_item = document.createElement("li");
-                current_parent.appendChild(list_item);
-                current_parent = list_item;
+                let listItem = document.createElement("li");
+                currentParent.appendChild(listItem);
+                currentParent = listItem;
 
-                current_depth += 1;
+                currentDepth += 1;
             }
             else {
                 // Need to go up in the list, pop <li>
-                current_parent = current_parent.parentElement;
+                currentParent = currentParent.parentElement;
 
                 // pop <ul>
-                current_parent = current_parent.parentElement;
+                currentParent = currentParent.parentElement;
 
-                current_depth -= 1;
+                currentDepth -= 1;
             }
         }
 
-        if ((current_depth > 0) && (diff <= 0)) {
+        if ((currentDepth > 0) && (diff <= 0)) {
             // Same level, pop the previous <li>
-            current_parent = current_parent.parentElement;
+            currentParent = currentParent.parentElement;
 
             // create sibling <li>
-            let list_item = document.createElement("li");
-            current_parent.appendChild(list_item);
-            current_parent = list_item;
+            let listItem = document.createElement("li");
+            currentParent.appendChild(listItem);
+            currentParent = listItem;
         }
 
-        let text = expand_string(line.trim(), attack, move, range);
-        current_parent.insertAdjacentHTML("beforeend", text);
+        let text = expandString(line.trim(), attack, move, range);
+        currentParent.insertAdjacentHTML("beforeend", text);
     }
 
     return card;
 }
 
-function load_ability_deck(deck_class, deck_name, level) {
-    let deck_definition = deck_definitions[deck_class];
-    deck_definition.name = deck_name;
-    deck_definition.level = level;
+function loadAbilityDeck(deckClass, deckName, level) {
+    let deckDefinition = deckDefinitions[deckClass];
+    deckDefinition.name = deckName;
+    deckDefinition.level = level;
 
-    let loaded_deck = JSON.parse(get_from_storage(deck_name));
+    let loadedDeck = JSON.parse(getFromStorage(deckName));
 
     let deck = {
-        class: deck_definition.class,
-        name: deck_definition.name,
+        class: deckDefinition.class,
+        name: deckDefinition.name,
         type: DECK_TYPES.ABILITY,
-        draw_pile: [],
+        drawPile: [],
         discard: [],
         move: [0, 0],
         attack: [0, 0],
         range: [0, 0],
-        level: deck_definition.level,
+        level: deckDefinition.level,
         health: [0, 0]
     };
 
-    for (let i = 0; i < deck_definition.cards.length; i++) {
-        let definition = deck_definition.cards[i];
+    for (let i = 0; i < deckDefinition.cards.length; i++) {
+        let definition = deckDefinition.cards[i];
         let shuffle = definition[0];
         let initiative = definition[1];
         let lines = definition.slice(2);
 
-        let empty_front = document.createElement("div");
-        empty_front.className = "card ability front down";
-        let card_front = empty_front;
-        let card_back = create_ability_card_back(deck.name, deck.level);
+        let emptyFront = document.createElement("div");
+        emptyFront.className = "card ability front down";
+        let cardFront = emptyFront;
+        let cardBack = createAbilityCardBack(deck.name, deck.level);
 
         let card = {
-            id: deck.name + '_' + i,
-            ui: new UICard(card_front, card_back),
-            shuffle_next: shuffle,
+            id: deck.name + "_" + i,
+            ui: new UICard(cardFront, cardBack),
+            shuffleNext: shuffle,
             initiative: initiative,
-            starting_lines: lines,
+            startingLines: lines,
         };
 
-        card.paint_front_card = function (name, lines, attack, move, range, level, health) {
-            this.ui.front = create_ability_card_front(this.initiative, name, this.shuffle_next, lines, attack, move, range, level, health);
+        card.paintFrontCard = function (name, lines, attack, move, range, level, health) {
+            this.ui.front = createAbilityCardFront(this.initiative, name, this.shuffleNext, lines, attack, move, 
+                                                   range, level, health);
         };
 
-        if (loaded_deck && find_in_discard(loaded_deck.discard, card.id)) {
+        if (loadedDeck && findInDiscard(loadedDeck.discard, card.id)) {
             deck.discard.push(card);
         } else {
-            deck.draw_pile.push(card);
+            deck.drawPile.push(card);
         }
     }
-    deck.draw_top_discard = function () {
+    deck.drawTopDiscard = function () {
         if (this.discard.length > 0) {
             let card = this.discard[this.discard.length - 1];
-            let cards_lines = card.starting_lines;
-            let extra_lines = [];
-            if (this.is_boss()) {
-                let new_lines = [];
-                cards_lines.forEach(function (line) {
-                    new_lines = new_lines.concat(special_to_lines(line, deck.special1, deck.special2));
+            let cardsLines = card.startingLines;
+            let extraLines = [];
+            if (this.isBoss()) {
+                let newLines = [];
+                cardsLines.forEach(function (line) {
+                    newLines = newLines.concat(specialToLines(line, deck.special1, deck.special2));
                 });
-                cards_lines = new_lines;
+                cardsLines = newLines;
                 if (this.immunities) {
-                    extra_lines = extra_lines.concat(immunities_to_lines(this.immunities));
+                    extraLines = extraLines.concat(immunitiesToLines(this.immunities));
                 }
                 if (this.notes) {
-                    extra_lines = extra_lines.concat(notes_to_lines(this.notes));
+                    extraLines = extraLines.concat(notesToLines(this.notes));
                 }
             }
             else {
                 if (this.attributes) {
-                    extra_lines = extra_lines.concat(attributes_to_lines(this.attributes));
+                    extraLines = extraLines.concat(attributesToLines(this.attributes));
                 }
 
             }
 
-            card.paint_front_card(this.get_real_name(), cards_lines.concat(extra_lines), this.attack, this.move, this.range, this.level, this.health);
+            card.paintFrontCard(this.getRealName(), cardsLines.concat(extraLines), this.attack, this.move, this.range, this.level, this.health);
 
-            card.ui.set_depth(-3);
+            card.ui.setDepth(-3);
             card.ui.addClass("pull");
-            card.ui.flip_up(true);
+            card.ui.flipUp(true);
             card.ui.removeClass("draw");
             card.ui.addClass("discard");
-            update_switch_initiative(this.deckid, card.initiative);
+            updateSwitchInitiative(this.deckid, card.initiative);
         }
-        force_repaint_deck(this);
+        forceRepaintDeck(this);
     };
 
-    deck.draw_top_card = function () {
+    deck.drawTopCard = function () {
 
-        let cards_lines = this.draw_pile[0].starting_lines;
-        let extra_lines = [];
-        if (this.is_boss()) {
-            let new_lines = [];
-            cards_lines.forEach(function (line) {
-                new_lines = new_lines.concat(special_to_lines(line, deck.special1, deck.special2));
+        let cardsLines = this.drawPile[0].startingLines;
+        let extraLines = [];
+        if (this.isBoss()) {
+            let newLines = [];
+            cardsLines.forEach(function (line) {
+                newLines = newLines.concat(specialToLines(line, deck.special1, deck.special2));
             });
-            cards_lines = new_lines;
+            cardsLines = newLines;
             if (this.immunities) {
-                extra_lines = extra_lines.concat(immunities_to_lines(this.immunities));
+                extraLines = extraLines.concat(immunitiesToLines(this.immunities));
             }
             if (this.notes) {
-                extra_lines = extra_lines.concat(notes_to_lines(this.notes));
+                extraLines = extraLines.concat(notesToLines(this.notes));
             }
         }
         else {
             if (this.attributes) {
-                extra_lines = extra_lines.concat(attributes_to_lines(this.attributes));
+                extraLines = extraLines.concat(attributesToLines(this.attributes));
             }
 
         }
 
-        this.draw_pile[0].paint_front_card(this.get_real_name(), cards_lines.concat(extra_lines), this.attack, this.move, this.range, this.level, this.health);
-        force_repaint_deck(this);
+        this.drawPile[0].paintFrontCard(this.getRealName(), cardsLines.concat(extraLines), this.attack, this.move, this.range, this.level, this.health);
+        forceRepaintDeck(this);
     };
 
-    deck.must_reshuffle = function () {
-        if (!this.draw_pile.length) {
+    deck.mustReshuffle = function () {
+        if (!this.drawPile.length) {
             return true;
         } else {
-            if (do_shuffles && this.discard.length) {
-                return this.discard[0].shuffle_next;
+            if (doShuffles && this.discard.length) {
+                return this.discard[0].shuffleNext;
             }
         }
     };
 
-    deck.set_stats_monster = function (stats) {
+    deck.setStatsMonster = function (stats) {
         this.attack = stats.attack;
         this.move = stats.move;
         this.range = stats.range;
@@ -366,7 +362,7 @@ function load_ability_deck(deck_class, deck_name, level) {
         this.health = stats.health;
     };
 
-    deck.set_stats_boss = function (stats) {
+    deck.setStatsBoss = function (stats) {
         this.attack = stats.attack;
         this.move = stats.move;
         this.range = stats.range;
@@ -377,172 +373,170 @@ function load_ability_deck(deck_class, deck_name, level) {
         this.health = stats.health;
     };
 
-    deck.get_real_name = function () {
+    deck.getRealName = function () {
         return (this.name) ? this.name : this.class;
     };
 
-    deck.is_boss = function () {
-        return this.class == DECKS["Boss"].class;
+    deck.isBoss = function () {
+        return this.class === DECKS["Boss"].class;
     };
 
-    deck.set_card_piles = function (draw_pile, discard_pile) {
-        for (let i = 0; i < draw_pile.length; i++) {
-            this.draw_pile[i].shuffle_next = draw_pile[i].shuffle_next;
-            this.draw_pile[i].initiative = draw_pile[i].initiative;
-            this.draw_pile[i].starting_lines = draw_pile[i].starting_lines;
+    deck.setCardPiles = function (drawPile, discardPile) {
+        for (let i = 0; i < drawPile.length; i++) {
+            this.drawPile[i].shuffleNext = drawPile[i].shuffleNext;
+            this.drawPile[i].initiative = drawPile[i].initiative;
+            this.drawPile[i].startingLines = drawPile[i].startingLines;
         }
-        for (let i = 0; i < discard_pile.length; i++) {
-            // TODO: Uncaught TypeError: Cannot set property 'shuffle_next' of undefined
-            this.discard[i].shuffle_next = discard_pile[i].shuffle_next;
-            this.discard[i].initiative = discard_pile[i].initiative;
-            this.discard[i].starting_lines = discard_pile[i].starting_lines;
+        for (let i = 0; i < discardPile.length; i++) {
+            // TODO: Uncaught TypeError: Cannot set property 'shuffleNext' of undefined
+            this.discard[i].shuffleNext = discardPile[i].shuffleNext;
+            this.discard[i].initiative = discardPile[i].initiative;
+            this.discard[i].startingLines = discardPile[i].startingLines;
         }
     };
 
-    deck.deckid = deck.get_real_name().replace(/\s+/g, '');
+    deck.deckid = deck.getRealName().replace(/\s+/g, "");
 
-    //add_deck_to_switch_list(deck);
-
-    write_to_storage(deck.name, JSON.stringify(deck));
+    writeToStorage(deck.name, JSON.stringify(deck));
     return deck;
 
 }
 
-function place_deck(deck, container) {
-    for (let i = 0; i < deck.draw_pile.length; i++) {
-        let card = deck.draw_pile[i];
+function placeDeck(deck, container) {
+    for (let i = 0; i < deck.drawPile.length; i++) {
+        let card = deck.drawPile[i];
         card.ui.attach(container);
     }
     for (let i = 0; i < deck.discard.length; i++) {
         let card = deck.discard[i];
         card.ui.attach(container);
     }
-    deck.deck_space = container;
+    deck.deckSpace = container;
 }
 
-function force_repaint_deck(deck) {
-    prevent_pull_animation(deck);
-    let space = deck.deck_space;
-    remove_child(space);
-    place_deck(deck, space);
+function forceRepaintDeck(deck) {
+    preventPullAnimation(deck);
+    let space = deck.deckSpace;
+    removeChild(space);
+    placeDeck(deck, space);
 }
 
 // This should be dynamic dependant on lines per card
-function refresh_ui() {
-    let actual_card_height = 296;
-    let base_font_size = 26.6;
+function refreshUi() {
+    let actualCardHeight = 296;
+    let baseFontSize = 26.6;
 
     let tableau = document.getElementById("tableau");
     let cards = tableau.getElementsByClassName("card");
     for (let i = 1; i < cards.length; i++) {
         if (cards[i].className.indexOf("ability") !== -1) {
-            let scale = cards[i].getBoundingClientRect().height / actual_card_height;
-            let scaled_font_size = base_font_size * scale;
+            let scale = cards[i].getBoundingClientRect().height / actualCardHeight;
+            let scaledFontSize = baseFontSize * scale;
 
-            let font_pixel_size = Math.min(scaled_font_size, base_font_size);
-            tableau.style.fontSize = font_pixel_size + "px";
+            let fontPixelSize = Math.min(scaledFontSize, baseFontSize);
+            tableau.style.fontSize = fontPixelSize + "px";
             break;
         }
     }
 }
 
-function reshuffle(deck, include_discards) {
-    shuffle_deck(deck, include_discards);
+function reshuffle(deck, includeDiscards) {
+    shuffleDeck(deck, includeDiscards);
 
     // This way we keep sync several decks from the same class
-    visible_ability_decks.forEach(function (visible_deck) {
-        if ((visible_deck !== deck) && (visible_deck.class == deck.class)) {
-            shuffle_deck(visible_deck, include_discards);
-            visible_deck.set_card_piles(deck.draw_pile, deck.discard);
+    visibleAbilityDecks.forEach(function (visibleDeck) {
+        if ((visibleDeck !== deck) && (visibleDeck.class === deck.class)) {
+            shuffleDeck(visibleDeck, includeDiscards);
+            visibleDeck.setCardPiles(deck.drawPile, deck.discard);
         }
     });
 }
 
-function shuffle_deck(deck, include_discards) {
-    if (include_discards) {
-        deck.draw_pile = deck.draw_pile.concat(deck.discard);
+function shuffleDeck(deck, includeDiscards) {
+    if (includeDiscards) {
+        deck.drawPile = deck.drawPile.concat(deck.discard);
         deck.discard = [];
     }
 
-    shuffle_list(deck.draw_pile);
+    shuffleList(deck.drawPile);
 
-    for (let i = 0; i < deck.draw_pile.length; i++) {
-        let card = deck.draw_pile[i];
+    for (let i = 0; i < deck.drawPile.length; i++) {
+        let card = deck.drawPile[i];
 
         card.ui.removeClass("lift");
         card.ui.removeClass("pull");
 
-        card.ui.flip_up(false);
+        card.ui.flipUp(false);
 
         card.ui.removeClass("discard");
         card.ui.addClass("draw");
 
-        card.ui.set_depth(-i - 6);
+        card.ui.setDepth(-i - 6);
     }
 }
 
-function flip_up_top_card(deck) {
+function flipUpTopCard(deck) {
     for (let i = 0; i < deck.discard.length; i++) {
         let card = deck.discard[i];
         card.ui.removeClass("lift");
         card.ui.removeClass("pull");
-        card.ui.push_down();
+        card.ui.pushDown();
     }
 
     if (deck.discard.length > 0) {
         deck.discard[0].ui.addClass("lift");
     }
 
-    let card = deck.draw_pile.shift();
-    send_to_discard(card, true);
+    let card = deck.drawPile.shift();
+    sendToDiscard(card, true);
     deck.discard.unshift(card);
 
-    update_switch_initiative(deck.deckid, card.initiative);
+    updateSwitchInitiative(deck.deckid, card.initiative);
     return card;
 }
 
-function send_to_discard(card, pull_animation) {
-    card.ui.set_depth(-3);
+function sendToDiscard(card, pullAnimation) {
+    card.ui.setDepth(-3);
 
-    if (pull_animation) {
+    if (pullAnimation) {
         card.ui.addClass("pull");
     }
 
-    card.ui.flip_up(true);
+    card.ui.flipUp(true);
 
     card.ui.removeClass("draw");
     card.ui.addClass("discard");
 }
 
-function draw_all_visible_ability_cards() {
-    visible_ability_decks.forEach(function (visible_deck) {
-        draw_ability_card(visible_deck);
+function drawAllVisibleAbilityCards() {
+    visibleAbilityDecks.forEach(function (visibleDeck) {
+        drawAbilityCard(visibleDeck);
     });
 }
 
-function draw_ability_card(deck) {
+function drawAbilityCard(deck) {
 
-    if (deck.must_reshuffle()) {
+    if (deck.mustReshuffle()) {
         reshuffle(deck, true);
-        draw_ability_card(deck);
+        drawAbilityCard(deck);
     }
     else {
-        visible_ability_decks.forEach(function (visible_deck) {
-            if (visible_deck.class == deck.class) {
-                visible_deck.draw_top_card();
-                let card = flip_up_top_card(visible_deck);
+        visibleAbilityDecks.forEach(function (visibleDeck) {
+            if (visibleDeck.class === deck.class) {
+                visibleDeck.drawTopCard();
+                let card = flipUpTopCard(visibleDeck);
 
-                visible_cards[deck.deckid] = card;
+                visibleCards[deck.deckid] = card;
 
-                update_switch_initiative(deck.deckid, card.initiative);
+                updateSwitchInitiative(deck.deckid, card.initiative);
             }
         });
     }
-    reorder_switches();
-    write_to_storage(deck.name, JSON.stringify(deck));
+    reorderSwitches();
+    writeToStorage(deck.name, JSON.stringify(deck));
 }
 
-function prevent_pull_animation(deck) {
+function preventPullAnimation(deck) {
     if (deck.discard.length) {
         if (deck.discard[1]) {
             deck.discard[1].ui.removeClass("lift");
@@ -553,144 +547,144 @@ function prevent_pull_animation(deck) {
     }
 }
 
-function reshuffle_modifier_deck(deck) {
-    deck.clean_discard_pile();
+function reshuffleModifierDeck(deck) {
+    deck.cleanDiscardPile();
     reshuffle(deck, true);
     document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, {detail: {shuffle: false}}));
 }
 
-function draw_modifier_card(deck) {
-    deck.clean_advantage_deck();
+function drawModifierCard(deck) {
+    deck.cleanAdvantageDeck();
 
-    if (deck.must_reshuffle()) {
-        reshuffle_modifier_deck(deck);
+    if (deck.mustReshuffle()) {
+        reshuffleModifierDeck(deck);
     }
     else {
-        flip_up_top_card(deck);
+        flipUpTopCard(deck);
 
         document.body.dispatchEvent(new CustomEvent(
             EVENT_NAMES.MODIFIER_CARD_DRAWN,
             {
                 detail: {
-                    card_type: deck.discard[0].card_type,
-                    count: deck.count(deck.discard[0].card_type)
+                    cardType: deck.discard[0].cardType,
+                    count: deck.count(deck.discard[0].cardType)
                 }
             }));
 
-        if (deck.shuffle_end_of_round()) {
+        if (deck.shuffleEndOfRound()) {
             document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, {detail: {shuffle: true}}));
         }
     }
-    write_to_storage("modifier_deck", JSON.stringify(deck));
+    writeToStorage("modifierDeck", JSON.stringify(deck));
 }
 
-function double_draw(deck) {
-    let advantage_card;
-    // Case there was 1 card in draw_pile when we clicked "draw 2".
+function doubleDraw(deck) {
+    let advantageCard;
+    // Case there was 1 card in drawPile when we clicked "draw 2".
     //    now we should draw, save that card, reshuffle, and
     //    draw the next
-    if (deck.draw_pile.length == 1) {
-        draw_modifier_card(deck);
-        reshuffle_modifier_deck(deck);
-        advantage_card = deck.draw_pile.shift();
-        send_to_discard(advantage_card, false);
-        deck.discard.unshift(advantage_card);
-        draw_modifier_card(deck);
+    if (deck.drawPile.length === 1) {
+        drawModifierCard(deck);
+        reshuffleModifierDeck(deck);
+        advantageCard = deck.drawPile.shift();
+        sendToDiscard(advantageCard, false);
+        deck.discard.unshift(advantageCard);
+        drawModifierCard(deck);
     }
-    // Case there were 0 cards in draw_pile when we clicked "draw 2".
+    // Case there were 0 cards in drawPile when we clicked "draw 2".
     //    we should reshuffle, draw 1 and send it to advantage_place,
     //    draw the next
-    else if (deck.draw_pile.length == 0) {
+    else if (deck.drawPile.length === 0) {
         // This is in case the previous draw was double as well
-        deck.clean_advantage_deck();
-        reshuffle_modifier_deck(deck);
-        draw_modifier_card(deck);
-        advantage_card = deck.discard[0];
-        draw_modifier_card(deck);
+        deck.cleanAdvantageDeck();
+        reshuffleModifierDeck(deck);
+        drawModifierCard(deck);
+        advantageCard = deck.discard[0];
+        drawModifierCard(deck);
     }
     // Every other simple case
     else {
-        draw_modifier_card(deck);
-        advantage_card = deck.discard[0];
-        draw_modifier_card(deck);
+        drawModifierCard(deck);
+        advantageCard = deck.discard[0];
+        drawModifierCard(deck);
     }
     deck.discard[0].ui.addClass("right");
-    advantage_card.ui.addClass("left");
-    deck.advantage_to_clean = true;
+    advantageCard.ui.addClass("left");
+    deck.advantageToClean = true;
 }
 
-function load_modifier_deck() {
+function loadModifierDeck() {
     let deck =
         {
             name: "Monster modifier deck",
             type: DECK_TYPES.MODIFIER,
-            draw_pile: [],
+            drawPile: [],
             discard: [],
-            advantage_to_clean: false
+            advantageToClean: false
         };
 
 
-    deck.draw_top_discard = function () {
+    deck.drawTopDiscard = function () {
         if (this.discard.length > 0) {
             let card = this.discard[this.discard.length - 1];
-            card.ui.set_depth(-3);
+            card.ui.setDepth(-3);
             card.ui.addClass("pull");
-            card.ui.flip_up(true);
+            card.ui.flipUp(true);
             card.ui.removeClass("draw");
             card.ui.addClass("discard");
         }
-        force_repaint_deck(this);
+        forceRepaintDeck(this);
     };
 
-    deck.count = function (card_type) {
-        return (this.draw_pile.filter(function (card) {
-            return card.card_type === card_type;
+    deck.count = function (cardType) {
+        return (this.drawPile.filter(function (card) {
+            return card.cardType === cardType;
         }).length);
     }.bind(deck);
 
-    deck.remove_card = function (card_type) {
-        for (let i = 0; i < deck.draw_pile.length; i++) {
-            if (deck.draw_pile[i].card_type == card_type) {
-                deck.draw_pile.splice(i, 1);
+    deck.removeCard = function (cardType) {
+        for (let i = 0; i < deck.drawPile.length; i++) {
+            if (deck.drawPile[i].cardType === cardType) {
+                deck.drawPile.splice(i, 1);
                 reshuffle(deck, false);
 
-                force_repaint_deck(deck);
+                forceRepaintDeck(deck);
                 break;
             }
         }
-        write_to_storage("modifier_deck", JSON.stringify(modifier_deck));
+        writeToStorage("modifierDeck", JSON.stringify(modifierDeck));
 
-        return this.count(card_type);
+        return this.count(cardType);
     }.bind(deck);
 
-    deck.add_card = function (card_type) {
+    deck.addCard = function (cardType) {
         // Rulebook p. 23: "a maximum of only 10 curse [and 10 bless] cards can be placed into any one deck"
-        if (this.count(card_type) < 10) {
+        if (this.count(cardType) < 10) {
             // TOOD: Brittle
-            deck.draw_pile.push(define_modifier_card(MODIFIER_CARDS[card_type.toUpperCase()]));
+            deck.drawPile.push(defineModifierCard(MODIFIER_CARDS[cardType.toUpperCase()]));
 
-            force_repaint_deck(deck);
+            forceRepaintDeck(deck);
             reshuffle(deck, false);
         }
-        write_to_storage("modifier_deck", JSON.stringify(modifier_deck));
+        writeToStorage("modifierDeck", JSON.stringify(modifierDeck));
 
-        return this.count(card_type);
+        return this.count(cardType);
     }.bind(deck);
 
-    deck.shuffle_end_of_round = function () {
+    deck.shuffleEndOfRound = function () {
         return this.discard.filter(function (card) {
-            return card.shuffle_next_round;
+            return card.shuffleNextRound;
         }).length > 0;
     }.bind(deck);
 
-    deck.must_reshuffle = function () {
-        return !this.draw_pile.length;
+    deck.mustReshuffle = function () {
+        return !this.drawPile.length;
     }.bind(deck);
 
-    deck.clean_discard_pile = function () {
+    deck.cleanDiscardPile = function () {
         for (let i = 0; i < deck.discard.length; i++) {
-            if (this.discard[i].card_type == CARD_TYPES_MODIFIER.BLESS
-                || this.discard[i].card_type == CARD_TYPES_MODIFIER.CURSE) {
+            if (this.discard[i].cardType === CARD_TYPES_MODIFIER.BLESS ||
+                this.discard[i].cardType === CARD_TYPES_MODIFIER.CURSE) {
                 //Delete this curse/bless that has been used
                 this.discard.splice(i, 1);
                 i--;
@@ -698,52 +692,52 @@ function load_modifier_deck() {
         }
 
         // This is needed every time we update
-        force_repaint_deck(this);
+        forceRepaintDeck(this);
     }.bind(deck);
 
-    deck.clean_advantage_deck = function () {
-        if ((deck.advantage_to_clean) && deck.discard[1]) {
-            deck.advantage_to_clean = false;
+    deck.cleanAdvantageDeck = function () {
+        if ((deck.advantageToClean) && deck.discard[1]) {
+            deck.advantageToClean = false;
             deck.discard[0].ui.removeClass("right");
             deck.discard[0].ui.removeClass("left");
             deck.discard[1].ui.removeClass("left");
             deck.discard[1].ui.removeClass("left");
         }
     }.bind(deck);
-    let loaded_deck = JSON.parse(get_from_storage("modifier_deck"));
+    let loadedDeck = JSON.parse(getFromStorage("modifierDeck"));
 
-    MODIFIER_DECK.forEach(function (card_definition) {
-        let card = define_modifier_card(card_definition);
-        if (loaded_deck && find_in_discard_and_remove(loaded_deck.discard, card.card_type)) {
+    MODIFIERDeck.forEach(function (cardDefinition) {
+        let card = defineModifierCard(cardDefinition);
+        if (loadedDeck && findInDiscardAndRemove(loadedDeck.discard, card.cardType)) {
             deck.discard.push(card);
         } else {
-            deck.draw_pile.push(card);
+            deck.drawPile.push(card);
         }
     });
 
     return deck;
 }
 
-function find_in_discard_and_remove(discard, card_type) {
+function findInDiscardAndRemove(discard, cardType) {
     for (let i = 0; i < discard.length; i++) {
-        if (discard[i].card_type === card_type) {
+        if (discard[i].cardType === cardType) {
             return discard.splice(i, 1);
         }
     }
     return null;
 }
 
-function create_modifier_card_back() {
+function createModifierCardBack() {
     let card = document.createElement("div");
     card.className = "card modifier back";
 
     return card;
 }
 
-function create_modifier_card_front(card_url) {
+function createModifierCardFront(cardUrl) {
     let img = document.createElement("img");
     img.className = "cover";
-    img.src = card_url;
+    img.src = cardUrl;
 
     let card = document.createElement("div");
     card.className = "card modifier front";
@@ -752,38 +746,38 @@ function create_modifier_card_front(card_url) {
     return card;
 }
 
-function define_modifier_card(card_definition) {
-    let card_front = create_modifier_card_front(card_definition.image);
-    let card_back = create_modifier_card_back();
+function defineModifierCard(cardDefinition) {
+    let cardFront = createModifierCardFront(cardDefinition.image);
+    let cardBack = createModifierCardBack();
 
     let card = {
-        ui: new UICard(card_front, card_back),
-        card_type: card_definition.type,
-        shuffle_next_round: card_definition.shuffle
+        ui: new UICard(cardFront, cardBack),
+        cardType: cardDefinition.type,
+        shuffleNextRound: cardDefinition.shuffle
     };
 
     return card;
 }
 
-function end_round() {
-    if (modifier_deck && modifier_deck.shuffle_end_of_round()) {
-        modifier_deck.clean_advantage_deck();
-        reshuffle_modifier_deck(modifier_deck);
+function endRound() {
+    if (modifierDeck && modifierDeck.shuffleEndOfRound()) {
+        modifierDeck.cleanAdvantageDeck();
+        reshuffleModifierDeck(modifierDeck);
     }
-    write_to_storage("modifier_deck", JSON.stringify(modifier_deck));
+    writeToStorage("modifierDeck", JSON.stringify(modifierDeck));
 }
 
-function load_definition(card_database) {
+function loadDefinition(cardDatabase) {
     let decks = {};
-    for (let i = 0; i < card_database.length; i++) {
-        let definition = card_database[i];
+    for (let i = 0; i < cardDatabase.length; i++) {
+        let definition = cardDatabase[i];
         decks[definition.class] = definition;
     }
 
     return decks;
 }
 
-function get_monster_stats(name, level) {
+function getMonsterStats(name, level) {
     let attack = [MONSTER_STATS["monsters"][name]["level"][level]["normal"]["attack"],
         MONSTER_STATS["monsters"][name]["level"][level]["elite"]["attack"]
     ];
@@ -804,7 +798,7 @@ function get_monster_stats(name, level) {
     return {"attack": attack, "move": move, "range": range, "attributes": attributes, "health": health};
 }
 
-function get_boss_stats(name, level) {
+function getBossStats(name, level) {
     name = name.replace("Boss: ", "");
     let attack = [MONSTER_STATS["bosses"][name]["level"][level]["attack"]];
     let move = [MONSTER_STATS["bosses"][name]["level"][level]["move"]];
@@ -824,123 +818,119 @@ function get_boss_stats(name, level) {
         "immunities": immunities,
         "notes": notes,
         "health": health
-    }
+    };
 }
 
-function apply_deck_selection(decks, preserve_existing_deck_state) {
+function applyDeckSelection(decks, preserveExistingDeckState) {
     let container = document.getElementById("tableau");
-    // document.getElementById("switcheslist").innerHTML = "";
-    let decks_to_remove = visible_ability_decks.filter(function (visible_deck) {
-        return !preserve_existing_deck_state || (decks.filter(function (deck) {
-            return ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))
-        }).length == 0);
+
+    let decksToRemove = visibleAbilityDecks.filter(function (visibleDeck) {
+        return !preserveExistingDeckState || (decks.filter(function (deck) {
+            return ((deck.name === visibleDeck.name) && (deck.level === visibleDeck.level));
+        }).length === 0);
     });
 
-    let decks_to_add = decks.filter(function (deck) {
-        return !preserve_existing_deck_state || (all_ability_decks.filter(function (ability_deck) {
-            return ((deck.name == ability_deck.name) && (deck.level == ability_deck.level))
-        }).length == 0);
+    let decksToAdd = decks.filter(function (deck) {
+        return !preserveExistingDeckState || (allAbilityDecks.filter(function (abilityDeck) {
+            return ((deck.name === abilityDeck.name) && (deck.level === abilityDeck.level));
+        }).length === 0);
     });
 
-    if (!modifier_deck) {
-        init_modifier_deck();
-        add_modifier_deck(container, modifier_deck, preserve_existing_deck_state);
-        if (preserve_existing_deck_state) {
-            let loaded_modifier_deck = JSON.parse(get_from_storage("modifier_deck"));
-            let curses = count_type("curse", loaded_modifier_deck);
-            let blessings = count_type("bless", loaded_modifier_deck);
+    if (!modifierDeck) {
+        initModifierDeck();
+        addModifierDeck(container, modifierDeck, preserveExistingDeckState);
+        if (preserveExistingDeckState) {
+            let loadedModifierDeck = JSON.parse(getFromStorage("modifierDeck"));
+            let curses = countType("curse", loadedModifierDeck);
+            let blessings = countType("bless", loadedModifierDeck);
             for (let i = 0; i < blessings; i++) {
-                modifier_deck.add_card("bless");
+                modifierDeck.addCard("bless");
             }
             for (let i = 0; i < curses; i++) {
-                modifier_deck.add_card("curse");
+                modifierDeck.addCard("curse");
             }
-            modifier_deck.draw_top_discard();
+            modifierDeck.drawTopDiscard();
 
-            document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, {detail: {shuffle: modifier_deck.shuffle_end_of_round()}}));
+            document.body.dispatchEvent(new CustomEvent(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, {detail: {shuffle: modifierDeck.shuffleEndOfRound()}}));
         }
     }
-    else if (!preserve_existing_deck_state) {
+    else if (!preserveExistingDeckState) {
         container.removeChild(document.getElementById("modifier-container"));
-        init_modifier_deck();
-        add_modifier_deck(container, modifier_deck, preserve_existing_deck_state);
+        initModifierDeck();
+        addModifierDeck(container, modifierDeck, preserveExistingDeckState);
     }
-    write_to_storage("modifier_deck", JSON.stringify(modifier_deck));
+    writeToStorage("modifierDeck", JSON.stringify(modifierDeck));
 
-    decks_to_remove.forEach(function (deck) {
-        deck.discard_deck();
+    decksToRemove.forEach(function (deck) {
+        deck.discardDeck();
     });
 
-    visible_ability_decks.forEach(function (deck) {
-        add_deck_to_switch_list(deck);
+    visibleAbilityDecks.forEach(function (deck) {
+        addDeckToSwitchList(deck);
     });
 
-    decks_to_add.forEach(function (deck) {
-        add_deck_to_switch_list(deck);
-        let deck_space = document.createElement("div");
-        deck_space.id = deck.deckid;
-        deck_space.addEventListener('contextmenu', function (e) {
-            this.className = "hiddendeck";
-            e.preventDefault();
-        }, false);
-        deck_space.className = "card-container";
+    decksToAdd.forEach(function (deck) {
+        addDeckToSwitchList(deck);
+        let deckSpace = document.createElement("div");
+        deckSpace.id = deck.deckid;
+        deckSpace.className = "card-container";
 
-        container.appendChild(deck_space);
+        container.appendChild(deckSpace);
 
-        place_deck(deck, deck_space);
-        reshuffle(deck, !preserve_existing_deck_state);
-        if (preserve_existing_deck_state) {
+        placeDeck(deck, deckSpace);
+        reshuffle(deck, !preserveExistingDeckState);
 
-        }
-        deck_space.onclick = draw_ability_card.bind(null, deck);
+        deckSpace.onclick = drawAbilityCard.bind(null, deck);
 
-        deck.discard_deck = function () {
-            let index = visible_ability_decks.indexOf(this);
+        deck.discardDeck = function () {
+            let index = visibleAbilityDecks.indexOf(this);
 
             if (index > -1) {
-                visible_ability_decks.splice(index, 1);
+                visibleAbilityDecks.splice(index, 1);
             }
 
-            container.removeChild(deck_space);
+            container.removeChild(deckSpace);
         };
 
-        if (deck.is_boss()) {
+        if (deck.isBoss()) {
             // We don't want stats if someone selects Boss on the deck tab
-            if (deck.get_real_name() != "Boss") {
-                deck.set_stats_boss(get_boss_stats(deck.get_real_name(), deck.level));
+            if (deck.getRealName() !== "Boss") {
+                deck.setStatsBoss(getBossStats(deck.getRealName(), deck.level));
             }
         } else {
-            deck.set_stats_monster(get_monster_stats(deck.get_real_name(), deck.level));
+            deck.setStatsMonster(getMonsterStats(deck.getRealName(), deck.level));
 
         }
         reshuffle(deck);
-        if (preserve_existing_deck_state) {
-            deck.draw_top_discard();
+        if (preserveExistingDeckState) {
+            deck.drawTopDiscard();
         } else {
-            force_repaint_deck(deck);
+            forceRepaintDeck(deck);
         }
-        all_ability_decks.push(deck);
-        visible_ability_decks.push(deck);
+        allAbilityDecks.push(deck);
+        visibleAbilityDecks.push(deck);
 
-        add_deck_to_switch_list(deck);
+        addDeckToSwitchList(deck);
     });
 
-    add_all_players_to_switch_list();
+    addAllPlayersToSwitchList();
 
-    reorder_switches();
+    reorderSwitches();
 
     // Rescale card text if necessary
-    refresh_ui();
+    refreshUi();
 }
 
-function add_player_to_switch_list(player) {
+function addPlayerToSwitchList(player) {
     // Don't put a new switch if one already exists
-    if (document.getElementById("switch-" + player.identifier)) return;
+    if (document.getElementById("switch-" + player.identifier)) {
+        return;
+    }
 
     let switcheslist = document.getElementById("switcheslist");
-    let list_item = document.createElement("li");
-    list_item.className = "switch noselect player";
-    switcheslist.appendChild(list_item);
+    let listItem = document.createElement("li");
+    listItem.className = "switch noselect player";
+    switcheslist.appendChild(listItem);
     let label = document.createElement("a");
     label.id = "switch-" + player.identifier;
     label.innerText = player.identifier;
@@ -957,108 +947,110 @@ function add_player_to_switch_list(player) {
     }, false);
     label.addEventListener("dblclick", function () {
         label.classList.remove("switchroundover");
-        update_player_init(player);
+        updatePlayerInit(player);
     }, false);
-    list_item.appendChild(label);
-    write_to_storage("players", JSON.stringify(players));
+    listItem.appendChild(label);
+    writeToStorage("players", JSON.stringify(players));
 }
 
-function add_all_players_to_switch_list() {
-    for (let player_name in players) {
-        if (players.hasOwnProperty(player_name)) {
-            add_player_to_switch_list(players[player_name]);
+function addAllPlayersToSwitchList() {
+    for (let playerName in players) {
+        if (players.hasOwnProperty(playerName)) {
+            addPlayerToSwitchList(players[playerName]);
         }
     }
 }
 
-function update_player_init(player) {
-    let list_item = document.getElementById("switch-" + player.identifier);
+function updatePlayerInit(player) {
+    let listItem = document.getElementById("switch-" + player.identifier);
     let initiative = document.getElementById("switch-" + player.identifier + "-initiative");
-    let modal_form = document.createElement('form');
-    modal_form.id = "modal_form";
-    modal_form.innerText = 'Enter initiative for ' + player.identifier + ': ';
-    let modal_input = document.createElement('input');
-    modal_input.id = 'modal_input';
-    modal_input.pattern = "\\d{0,2}";
-    modal_form.appendChild(modal_input);
-    let modal_submit = document.createElement('input');
-    modal_submit.type = "submit";
-    modal_form.appendChild(modal_submit);
+    let modalForm = document.createElement("form");
+    modalForm.id = "modalForm";
+    modalForm.innerText = "Enter initiative for " + player.identifier + ": ";
+    let modalInput = document.createElement("input");
+    modalInput.id = "modalInput";
+    modalInput.pattern = "\\d{0,2}";
+    modalForm.appendChild(modalInput);
+    let modalSubmit = document.createElement("input");
+    modalSubmit.type = "submit";
+    modalForm.appendChild(modalSubmit);
     Modal.open({
         openCallback: function () {
-            modal_open = true;
-            let modal_input = $('#modal_input');
-            modal_input.keypad(
+            modalOpen = true;
+            let modalInput = $("#modalInput");
+            modalInput.keypad(
                 {
                     keypadOnly: false,
-                    showAnim: '',
-                    layout: ['123',
-                        '456' + $.keypad.CLEAR,
-                        '789' + $.keypad.BACK,
-                        $.keypad.SPACE + '0'],
+                    showAnim: "",
+                    layout: ["123",
+                        "456" + $.keypad.CLEAR,
+                        "789" + $.keypad.BACK,
+                        $.keypad.SPACE + "0"],
                     onClose: function (value, inst) {
                         console.log(value);
-                        modal_input.value = value;
+                        modalInput.value = value;
                         Modal.close();
                     }
                 }
             );
-            modal_input.keypad('show');
+            modalInput.keypad("show");
         },
-        content: modal_form.outerHTML,
+        content: modalForm.outerHTML,
         closeCallback: function () {
-            modal_open = false;
-            let new_init = modal_input.value;
-            player.initiative = new_init;
-            if (!new_init) {
-                new_init = "??";
+            modalOpen = false;
+            let newInit = modalInput.value;
+            player.initiative = newInit;
+            if (!newInit) {
+                newInit = "??";
             } else {
-                list_item.classList.remove("switchremoved");
-                list_item.classList.remove("switchroundover");
+                listItem.classList.remove("switchremoved");
+                listItem.classList.remove("switchroundover");
             }
-            initiative.innerText = " (" + new_init + ")";
-            reorder_switches();
-            write_to_storage("players", JSON.stringify(players));
+            initiative.innerText = " (" + newInit + ")";
+            reorderSwitches();
+            writeToStorage("players", JSON.stringify(players));
         }
     });
-    modal_form.addEventListener("submit", function (e) {
+    modalForm.addEventListener("submit", function (e) {
         e.preventDefault();
         Modal.close();
     });
-    write_to_storage("players", JSON.stringify(players));
+    writeToStorage("players", JSON.stringify(players));
 }
 
-function wait_for_modal_close(cb, arg) {
-    if (modal_open) {
-        setTimeout(wait_for_modal_close, 300, cb, arg);
+function waitForModalClose(cb, arg) {
+    if (modalOpen) {
+        setTimeout(waitForModalClose, 300, cb, arg);
     } else if (cb) {
         cb(arg);
     }
 }
 
-function update_all_player_inits() {
-    for (let player_name in players) {
-        if (players.hasOwnProperty(player_name)) {
-            wait_for_modal_close(update_player_init, players[player_name]);
+function updateAllPlayerInits() {
+    for (let playerName in players) {
+        if (players.hasOwnProperty(playerName)) {
+            waitForModalClose(updatePlayerInit, players[playerName]);
         }
     }
 }
 
-function add_deck_to_switch_list(deck) {
+function addDeckToSwitchList(deck) {
     // Don't put a new switch if one already exists
-    if (document.getElementById("switch-" + deck.deckid)) return;
+    if (document.getElementById("switch-" + deck.deckid)) {
+        return;
+    }
 
     let switcheslist = document.getElementById("switcheslist");
-    let list_item = document.createElement("li");
-    list_item.className = "switch noselect";
-    switcheslist.appendChild(list_item);
+    let listItem = document.createElement("li");
+    listItem.className = "switch noselect";
+    switcheslist.appendChild(listItem);
     let label = document.createElement("a");
     label.id = "switch-" + deck.deckid;
-    label.innerText = deck.get_real_name();
+    label.innerText = deck.getRealName();
     let initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
-    if (deck.deckid in visible_cards) {
-        initiative.innerText = " (" + visible_cards[deck.deckid].initiative + ")";
+    if (deck.deckid in visibleCards) {
+        initiative.innerText = " (" + visibleCards[deck.deckid].initiative + ")";
     } else {
         initiative.innerText = " (??)";
     }
@@ -1066,8 +1058,8 @@ function add_deck_to_switch_list(deck) {
     label.addEventListener("click", function () {
         let d = document.getElementById(this.id.replace("switch-", ""));
         if (d.classList.contains("hiddendeck")) {
-            visible_ability_decks.push(deck);
-            list_item.classList.remove("switchremoved");
+            visibleAbilityDecks.push(deck);
+            listItem.classList.remove("switchremoved");
             d.classList.remove("hiddendeck");
             d.classList.remove("deckroundover");
             label.classList.remove("switchroundover");
@@ -1083,34 +1075,34 @@ function add_deck_to_switch_list(deck) {
     label.addEventListener("dblclick", function () {
         let d = document.getElementById(this.id.replace("switch-", ""));
         if (d.classList.contains("hiddendeck")) {
-            visible_ability_decks.push(deck);
-            list_item.classList.remove("switchremoved");
+            visibleAbilityDecks.push(deck);
+            listItem.classList.remove("switchremoved");
         } else {
-            visible_ability_decks.splice(visible_ability_decks.indexOf(deck), 1);
-            list_item.classList.add("switchremoved");
+            visibleAbilityDecks.splice(visibleAbilityDecks.indexOf(deck), 1);
+            listItem.classList.add("switchremoved");
         }
         d.classList.toggle("hiddendeck");
     }, false);
-    list_item.addEventListener("mouseenter", function () {
+    listItem.addEventListener("mouseenter", function () {
         let d = document.getElementById(this.firstElementChild.id.replace("switch-", ""));
         d.classList.add("hoveredswitch");
     }, false);
-    list_item.addEventListener("mouseleave", function () {
+    listItem.addEventListener("mouseleave", function () {
         let d = document.getElementById(this.firstElementChild.id.replace("switch-", ""));
         d.classList.remove("hoveredswitch");
     }, false);
-    list_item.appendChild(label);
+    listItem.appendChild(label);
 }
 
-function init_modifier_deck() {
-    modifier_deck = load_modifier_deck();
+function initModifierDeck() {
+    modifierDeck = loadModifierDeck();
 }
 
-function count_type(type, deck) {
+function countType(type, deck) {
     let count = 0;
     if (deck) {
-        for (let i = 0; i < deck.draw_pile.length; i++) {
-            if (deck.draw_pile[i].card_type === type) {
+        for (let i = 0; i < deck.drawPile.length; i++) {
+            if (deck.drawPile[i].cardType === type) {
                 count++;
             }
         }
@@ -1118,191 +1110,191 @@ function count_type(type, deck) {
     return count;
 }
 
-function add_modifier_deck(container, deck, preserve_discards) {
-    function create_counter(card_type, increment_func, decrement_func) {
-        function create_button(class_name, text, func, text_element) {
+function addModifierDeck(container, deck, preserveDiscards) {
+    function createCounter(cardType, incrementFunc, decrementFunc) {
+        function createButton(className, text, func, textElement) {
             let button = document.createElement("div");
-            button.className = class_name + " button";
+            button.className = className + " button";
             button.innerText = text;
 
             button.onclick = function () {
-                text_element.innerText = func(card_type);
+                textElement.innerText = func(cardType);
             };
 
             return button;
         }
 
-        let widget_container = document.createElement("div");
-        widget_container.className = "counter-icon";
+        let widgetContainer = document.createElement("div");
+        widgetContainer.className = "counter-icon";
 
         let background = document.createElement("div");
-        background.className = "background " + card_type;
-        widget_container.appendChild(background);
+        background.className = "background " + cardType;
+        widgetContainer.appendChild(background);
 
-        let text_element = document.createElement("div");
-        text_element.className = "icon-text";
-        text_element.innerText = "0";
+        let textElement = document.createElement("div");
+        textElement.className = "icon-text";
+        textElement.innerText = "0";
 
-        widget_container.appendChild(create_button("decrement", "-", decrement_func, text_element));
-        widget_container.appendChild(text_element);
-        widget_container.appendChild(create_button("increment", "+", increment_func, text_element));
+        widgetContainer.appendChild(createButton("decrement", "-", decrementFunc, textElement));
+        widgetContainer.appendChild(textElement);
+        widgetContainer.appendChild(createButton("increment", "+", incrementFunc, textElement));
 
         document.body.addEventListener(EVENT_NAMES.MODIFIER_CARD_DRAWN, function (e) {
-            if (e.detail.card_type === card_type) {
-                text_element.innerText = e.detail.count;
+            if (e.detail.cardType === cardType) {
+                textElement.innerText = e.detail.count;
             }
         });
 
-        return widget_container;
+        return widgetContainer;
     }
 
-    function indicate_shuffle_required(e) {
+    function indicateShuffleRequired(e) {
         if (e.detail.shuffle) {
             window.setTimeout(function () {
-                end_round_div.className = "counter-icon shuffle";
+                endRoundDiv.className = "counter-icon shuffle";
             }, 400);
         }
         else {
-            end_round_div.className = "counter-icon shuffle not-required";
+            endRoundDiv.className = "counter-icon shuffle not-required";
         }
     }
 
-    let modifier_container = document.createElement("div");
-    modifier_container.className = "card-container";
-    modifier_container.id = "modifier-container";
+    let modifierContainer = document.createElement("div");
+    modifierContainer.className = "card-container";
+    modifierContainer.id = "modifier-container";
 
-    let button_div = document.createElement("div");
-    button_div.className = "modifier-deck-column-1";
+    let buttonDiv = document.createElement("div");
+    buttonDiv.className = "modifier-deck-column-1";
 
-    button_div.appendChild(create_counter("bless", deck.add_card, deck.remove_card));
-    button_div.appendChild(create_counter("curse", deck.add_card, deck.remove_card));
+    buttonDiv.appendChild(createCounter("bless", deck.addCard, deck.removeCard));
+    buttonDiv.appendChild(createCounter("curse", deck.addCard, deck.removeCard));
 
-    let end_round_div = document.createElement("div");
-    end_round_div.className = "counter-icon shuffle not-required";
-    end_round_div.onclick = end_round;
+    let endRoundDiv = document.createElement("div");
+    endRoundDiv.className = "counter-icon shuffle not-required";
+    endRoundDiv.onclick = endRound;
 
-    document.body.addEventListener(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, indicate_shuffle_required);
+    document.body.addEventListener(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, indicateShuffleRequired);
 
-    button_div.appendChild(end_round_div);
+    buttonDiv.appendChild(endRoundDiv);
 
-    let deck_column = document.createElement("div");
-    deck_column.className = "modifier-deck-column-2";
+    let deckColumn = document.createElement("div");
+    deckColumn.className = "modifier-deck-column-2";
 
-    let deck_space = document.createElement("div");
-    deck_space.className = "card-container modifier";
+    let deckSpace = document.createElement("div");
+    deckSpace.className = "card-container modifier";
 
-    let draw_two_button = document.createElement("div");
-    draw_two_button.className = "button draw-two";
-    draw_two_button.onclick = double_draw.bind(null, modifier_deck);
+    let drawTwoButton = document.createElement("div");
+    drawTwoButton.className = "button draw-two";
+    drawTwoButton.onclick = doubleDraw.bind(null, modifierDeck);
 
-    deck_column.appendChild(deck_space);
-    deck_column.appendChild(draw_two_button);
+    deckColumn.appendChild(deckSpace);
+    deckColumn.appendChild(drawTwoButton);
 
-    modifier_container.appendChild(deck_column);
-    modifier_container.appendChild(button_div);
+    modifierContainer.appendChild(deckColumn);
+    modifierContainer.appendChild(buttonDiv);
 
-    container.appendChild(modifier_container);
+    container.appendChild(modifierContainer);
 
-    place_deck(deck, deck_space);
-    reshuffle(deck, !preserve_discards);
-    deck_space.onclick = draw_modifier_card.bind(null, deck);
+    placeDeck(deck, deckSpace);
+    reshuffle(deck, !preserveDiscards);
+    deckSpace.onclick = drawModifierCard.bind(null, deck);
 }
 
 function LevelSelector(text, inline) {
-    let max_level = 7;
+    let maxLevel = 7;
     let level = {};
     level.html = inline ? document.createElement("span") : document.createElement("ul");
     level.html.className = "selectionlist";
 
-    let listitem = inline ? document.createElement("label") : document.createElement("li");
-    listitem.innerText = text;
-    level.html.appendChild(listitem);
+    let listItem = inline ? document.createElement("label") : document.createElement("li");
+    listItem.innerText = text;
+    level.html.appendChild(listItem);
 
-    let level_spinner = create_input("number", "level_selector", "1", "");
-    level_spinner.input.min = 0;
-    level_spinner.input.max = max_level;
-    level.html.appendChild(level_spinner.input);
-    level.spinner = level_spinner.input;
+    let levelSpinner = createInput("number", "levelSelector", "1", "");
+    levelSpinner.input.min = 0;
+    levelSpinner.input.max = maxLevel;
+    level.html.appendChild(levelSpinner.input);
+    level.spinner = levelSpinner.input;
 
-    level.get_selection = function () {
-        return (this.spinner.value > max_level) ? max_level : this.spinner.value;
+    level.getSelection = function () {
+        return (this.spinner.value > maxLevel) ? maxLevel : this.spinner.value;
     };
 
-    level.set_value = function (value) {
-        this.spinner.value = (value > max_level) ? max_level : value;
+    level.setValue = function (value) {
+        this.spinner.value = (value > maxLevel) ? maxLevel : value;
     };
 
     return level;
 }
 
 function DeckList() {
-    let decklist = {};
-    decklist.ul = document.createElement("ul");
-    decklist.ul.className = "selectionlist";
-    decklist.checkboxes = {};
-    decklist.level_selectors = {};
-    decklist.global_level_selector = null;
+    let deckList = {};
+    deckList.ul = document.createElement("ul");
+    deckList.ul.className = "selectionlist";
+    deckList.checkboxes = {};
+    deckList.levelSelectors = {};
+    deckList.globalLevelSelector = null;
 
 
-    let listitem = document.createElement("li");
-    let global_level_selector = new LevelSelector("Select global level ", true);
-    listitem.appendChild(global_level_selector.html);
-    decklist.global_level_selector = global_level_selector;
+    let listItem = document.createElement("li");
+    let globalLevelIndicator = new LevelSelector("Select global level ", true);
+    listItem.appendChild(globalLevelIndicator.html);
+    deckList.globalLevelSelector = globalLevelIndicator;
 
-    let dom_dict = create_input("button", "applylevel", "Apply to All", "");
-    dom_dict.input.onclick = function () {
-        for (let key in decklist.level_selectors) {
-            decklist.level_selectors[key].set_value(decklist.global_level_selector.get_selection());
+    let domDict = createInput("button", "applylevel", "Apply to All", "");
+    domDict.input.onclick = function () {
+        for (let key in deckList.levelSelectors) {
+            deckList.levelSelectors[key].setValue(deckList.globalLevelSelector.getSelection());
         }
     };
-    listitem.appendChild(dom_dict.root);
+    listItem.appendChild(domDict.root);
 
-    decklist.ul.appendChild(listitem);
+    deckList.ul.appendChild(listItem);
 
     for (let key in DECKS) {
-        let real_name = DECKS[key].name;
-        let listitem = document.createElement("li");
-        let dom_dict = create_input("checkbox", "deck", real_name, real_name);
-        listitem.appendChild(dom_dict.root);
+        let realName = DECKS[key].name;
+        let listItem = document.createElement("li");
+        let domDict = createInput("checkbox", "deck", realName, realName);
+        listItem.appendChild(domDict.root);
 
-        let level_selector = new LevelSelector(" with level ", true);
-        listitem.appendChild(level_selector.html);
+        let levelSelector = new LevelSelector(" with level ", true);
+        listItem.appendChild(levelSelector.html);
 
-        decklist.ul.appendChild(listitem);
-        decklist.checkboxes[real_name] = dom_dict.input;
-        decklist.level_selectors[real_name] = level_selector;
+        deckList.ul.appendChild(listItem);
+        deckList.checkboxes[realName] = domDict.input;
+        deckList.levelSelectors[realName] = levelSelector;
 
     }
 
-    decklist.get_selection = function () {
-        return dict_values(this.checkboxes).filter(is_checked).map(input_value);
+    deckList.getSelection = function () {
+        return dictValues(this.checkboxes).filter(isChecked).map(inputValue);
     };
 
-    decklist.get_selected_decks = function () {
-        let selected_checkbox = this.get_selection();
-        let selected_decks = concat_arrays(selected_checkbox.map(function (name) {
+    deckList.getSelectedDecks = function () {
+        let selectedCheckbox = this.getSelection();
+        let selectedDecks = concatArrays(selectedCheckbox.map(function (name) {
             let deck = ((name in DECKS) ? DECKS[name] : []);
-            deck.level = decklist.level_selectors[name].get_selection();
+            deck.level = deckList.levelSelectors[name].getSelection();
             return deck;
         }.bind(this)));
-        return selected_decks;
+        return selectedDecks;
     };
 
-    decklist.set_selection = function (selected_deck_names) {
-        dict_values(this.checkboxes).forEach(function (checkbox) {
+    deckList.setSelection = function (selectedDeckNames) {
+        dictValues(this.checkboxes).forEach(function (checkbox) {
             checkbox.checked = false;
         });
 
-        selected_deck_names.forEach(function (deck_names) {
-            let checkbox = this.checkboxes[deck_names.name];
+        selectedDeckNames.forEach(function (deckNames) {
+            let checkbox = this.checkboxes[deckNames.name];
             if (checkbox) {
                 checkbox.checked = true;
-                decklist.level_selectors[deck_names.name].set_value(deck_names.level);
+                deckList.levelSelectors[deckNames.name].setValue(deckNames.level);
             }
         }.bind(this));
     };
 
-    return decklist;
+    return deckList;
 }
 
 function ScenarioList(scenarios) {
@@ -1311,61 +1303,63 @@ function ScenarioList(scenarios) {
     scenariolist.ul.className = "selectionlist";
     scenariolist.spinner = null;
     scenariolist.decks = {};
-    scenariolist.special_rules = {};
-    scenariolist.level_selector = null;
+    scenariolist.specialRules = {};
+    scenariolist.levelSelector = null;
 
-    scenariolist.level_selector = new LevelSelector("Select level", false);
+    scenariolist.levelSelector = new LevelSelector("Select level", false);
 
-    scenariolist.ul.appendChild(scenariolist.level_selector.html);
+    scenariolist.ul.appendChild(scenariolist.levelSelector.html);
 
     for (let i = 0; i < scenarios.length; i++) {
         let scenario = scenarios[i];
         scenariolist.decks[i] = scenario.decks;
-        scenariolist.special_rules[i] = scenario.special_rules ? scenario.special_rules : "";
+        scenariolist.specialRules[i] = scenario.specialRules ? scenario.specialRules : "";
     }
 
     let listitem = document.createElement("li");
     listitem.innerText = "Select scenario number";
     scenariolist.ul.appendChild(listitem);
 
-    let scenario_spinner = create_input("number", "scenario_number", "1", "");
-    scenario_spinner.input.min = 1;
-    scenario_spinner.input.max = scenarios.length;
-    scenariolist.ul.appendChild(scenario_spinner.input);
-    scenariolist.spinner = scenario_spinner.input;
+    let scenarioSpinner = createInput("number", "scenario_number", "1", "");
+    scenarioSpinner.input.min = 1;
+    scenarioSpinner.input.max = scenarios.length;
+    scenariolist.ul.appendChild(scenarioSpinner.input);
+    scenariolist.spinner = scenarioSpinner.input;
 
-    scenariolist.get_selection = function () {
+    scenariolist.getSelection = function () {
         // We're using the scenario index that is zero-based, but the scenario list is 1-based
-        let current_value = scenariolist.spinner.value - 1;
-        return Math.min(current_value, scenarios.length + 1);
+        let currentValue = scenariolist.spinner.value - 1;
+        return Math.min(currentValue, scenarios.length + 1);
     };
 
-    scenariolist.get_level = function (deck_name, special_rules) {
+    scenariolist.getLevel = function (deckName, specialRules) {
 
-        let base_level = scenariolist.level_selector.get_selection();
+        let baseLevel = scenariolist.levelSelector.getSelection();
 
-        if ((special_rules.indexOf(SPECIAL_RULES.living_corpse_two_levels_extra) >= 0) && (deck_name == SPECIAL_RULES.living_corpse_two_levels_extra.affected_deck)) {
-            return Math.min(7, (parseInt(base_level) + parseInt(SPECIAL_RULES.living_corpse_two_levels_extra.extra_levels)));
+        if ((specialRules.indexOf(SPECIAL_RULES.livingCorpseTwoLevelsExtra) >= 0) &&
+            (deckName === SPECIAL_RULES.livingCorpseTwoLevelsExtra.affectedDeck)) {
+            return Math.min(7,
+                (parseInt(baseLevel) + parseInt(SPECIAL_RULES.livingCorpseTwoLevelsExtra.extraLevels)));
         } else {
-            return base_level;
+            return baseLevel;
         }
     };
 
-    scenariolist.get_scenario_decks = function () {
-        return (this.decks[this.get_selection()].map(function (deck) {
+    scenariolist.getScenarioDecks = function () {
+        return (this.decks[this.getSelection()].map(function (deck) {
             if (DECKS[deck.name]) {
                 deck.class = DECKS[deck.name].class;
-            } else if (deck.name.indexOf("Boss") != -1) {
+            } else if (deck.name.indexOf("Boss") !== -1) {
                 deck.class = DECKS["Boss"].class;
             }
-            deck.level = scenariolist.get_level(deck.name, scenariolist.get_special_rules());
+            deck.level = scenariolist.getLevel(deck.name, scenariolist.getSpecialRules());
             return deck;
         }));
-    }
+    };
 
-    scenariolist.get_special_rules = function () {
-        return this.special_rules[this.get_selection()];
-    }
+    scenariolist.getSpecialRules = function () {
+        return this.specialRules[this.getSelection()];
+    };
 
     return scenariolist;
 }
@@ -1373,7 +1367,7 @@ function ScenarioList(scenarios) {
 function PlayerList() {
     let playerlist = [];
 
-    playerlist.get_selection = function () {
+    playerlist.getSelection = function () {
         playerlist = [];
         for (let i = 1; i <= 4; i++) {
             let playerIdInput = document.getElementById("player" + i + "idinput");
@@ -1386,7 +1380,7 @@ function PlayerList() {
         return playerlist;
     };
 
-    playerlist.set_selection = function (selected_players) {
+    playerlist.setSelection = function (selectedPlayers) {
         // Default out the inputs
         for (let i = 1; i <= 4; i++) {
             let playerIdInput = document.getElementById("player" + i + "idinput");
@@ -1396,12 +1390,12 @@ function PlayerList() {
         }
 
         let i = 1;
-        for (let player_name in selected_players) {
-            if (selected_players.hasOwnProperty(player_name)) {
+        for (let playerName in selectedPlayers) {
+            if (selectedPlayers.hasOwnProperty(playerName)) {
                 let playerIdInput = document.getElementById("player" + i + "idinput");
                 let playerLevelInput = document.getElementById("player" + i + "levelinput");
 
-                let player = selected_players[player_name];
+                let player = selectedPlayers[playerName];
                 playerIdInput.value = player.identifier;
                 playerLevelInput.value = player.level;
                 playerlist.push(player);
@@ -1410,11 +1404,11 @@ function PlayerList() {
         }
     };
 
-    playerlist.update_global_players = function () {
+    playerlist.updateGlobalPlayers = function () {
         players = {};
         for (let i = 0; i < playerlist.length; i++) {
             if (playerlist[i].identifier) {
-                add_player(playerlist[i].identifier, playerlist[i].level);
+                addPlayer(playerlist[i].identifier, playerlist[i].level);
             }
         }
     };
@@ -1422,7 +1416,7 @@ function PlayerList() {
     return playerlist;
 }
 
-function calculate_party_level() {
+function calculatePartyLevel() {
     let levels = Object.keys(players).map(f => players[f].level);
 
     let total = 0;
@@ -1431,128 +1425,128 @@ function calculate_party_level() {
     }
     let avg = total / levels.length;
 
-    party_level = Math.ceil(avg / 2);
+    partyLevel = Math.ceil(avg / 2);
 
-    let level_selectors = document.getElementsByName("level_selector");
-    for (let selector in level_selectors) {
-        if (level_selectors.hasOwnProperty(selector)) {
-            level_selectors[selector].value = party_level;
+    let levelSelectors = document.getElementsByName("levelSelector");
+    for (let selector in levelSelectors) {
+        if (levelSelectors.hasOwnProperty(selector)) {
+            levelSelectors[selector].value = partyLevel;
         }
     }
 }
 
-function load_round_counter() {
-    let round_num = get_from_storage("roundnumber");
-    if (!round_num) {
-        round_num = 0;
+function loadRoundCounter() {
+    let roundNum = getFromStorage("roundnumber");
+    if (!roundNum) {
+        roundNum = 0;
     }
     let counter = document.getElementById("roundcounter");
-    counter.innerText = round_num;
+    counter.innerText = roundNum;
 }
 
-function reset_round_counter() {
+function resetRoundCounter() {
     localStorage.removeItem("roundnumber");
     let counter = document.getElementById("roundcounter");
-    counter.innerText = 0;
+    counter.innerText = "0";
 }
 
-function increment_round_counter() {
+function incrementRoundCounter() {
     let counter = document.getElementById("roundcounter");
     counter.innerText++;
-    write_to_storage("roundnumber", counter.innerText);
+    writeToStorage("roundnumber", counter.innerText);
 }
 
 function init() {
-    let deckspage = document.getElementById("deckspage");
-    let scenariospage = document.getElementById("scenariospage");
-    let applydeckbtn = document.getElementById("applydecks");
-    let applyscenariobtn = document.getElementById("applyscenario");
-    let applyloadbtn = document.getElementById("applyload");
-    let applyplayersbtn = document.getElementById("applyplayers");
-    let loadplayersbtn = document.getElementById("loadplayers");
-    let playerinputform = document.getElementById("playerinputform");
-    let showmodifierdeck = document.getElementById("showmodifierdeck");
+    let decksPage = document.getElementById("deckspage");
+    let scenariosPage = document.getElementById("scenariospage");
+    let applyDeckBtn = document.getElementById("applydecks");
+    let applyScenarioBtn = document.getElementById("applyscenario");
+    let applyLoadBtn = document.getElementById("applyload");
+    let applyPlayersBtn = document.getElementById("applyplayers");
+    let loadPlayersBtn = document.getElementById("loadplayers");
+    let playerInputForm = document.getElementById("playerinputform");
+    let showModifierCode = document.getElementById("showmodifierdeck");
 
-    let decklist = new DeckList();
-    let scenariolist = new ScenarioList(SCENARIO_DEFINITIONS);
-    let playerlist = new PlayerList();
+    let deckList = new DeckList();
+    let scenarioList = new ScenarioList(SCENARIO_DEFINITIONS);
+    let playerList = new PlayerList();
 
-    deckspage.insertAdjacentElement("afterbegin", decklist.ul);
-    scenariospage.insertAdjacentElement("afterbegin", scenariolist.ul);
+    decksPage.insertAdjacentElement("afterbegin", deckList.ul);
+    scenariosPage.insertAdjacentElement("afterbegin", scenarioList.ul);
 
-    applydeckbtn.onclick = function () {
-        localStorage.removeItem("selected_deck_names");
-        let selected_deck_names = decklist.get_selected_decks();
-        write_to_storage("selected_deck_names", JSON.stringify(selected_deck_names));
-        let selected_decks = selected_deck_names.map(function (deck_names) {
-            return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
+    applyDeckBtn.onclick = function () {
+        localStorage.removeItem("selectedDeckNames");
+        let selectedDeckNames = deckList.getSelectedDecks();
+        writeToStorage("selectedDeckNames", JSON.stringify(selectedDeckNames));
+        let selectedDecks = selectedDeckNames.map(function (deckNames) {
+            return loadAbilityDeck(deckNames.class, deckNames.name, deckNames.level);
         });
-        apply_deck_selection(selected_decks, true);
-        let showmodifierdeck_deckspage = document.getElementById("showmodifierdeck-deckspage");
-        let modifier_deck_section = document.getElementById("modifier-container");
-        if (!showmodifierdeck_deckspage.checked) {
-            modifier_deck_section.style.display = "none";
+        applyDeckSelection(selectedDecks, true);
+        let showModifierDecksPage = document.getElementById("showmodifierdeck-deckspage");
+        let modifierDeckSection = document.getElementById("modifier-container");
+        if (!showModifierDecksPage.checked) {
+            modifierDeckSection.style.display = "none";
         }
         else {
-            modifier_deck_section.style.display = "block";
+            modifierDeckSection.style.display = "block";
         }
-        reset_round_counter();
+        resetRoundCounter();
     };
 
-    applyscenariobtn.onclick = function () {
-        localStorage.removeItem("selected_deck_names");
-        let selected_deck_names = scenariolist.get_scenario_decks();
-        write_to_storage("selected_deck_names", JSON.stringify(selected_deck_names));
-        decklist.set_selection(selected_deck_names);
-        let selected_decks = selected_deck_names.map(function (deck_names) {
-            return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
+    applyScenarioBtn.onclick = function () {
+        localStorage.removeItem("selectedDeckNames");
+        let selectedDeckNames = scenarioList.getScenarioDecks();
+        writeToStorage("selectedDeckNames", JSON.stringify(selectedDeckNames));
+        deckList.setSelection(selectedDeckNames);
+        let selectedDecks = selectedDeckNames.map(function (deckNames) {
+            return loadAbilityDeck(deckNames.class, deckNames.name, deckNames.level);
         });
-        apply_deck_selection(selected_decks, false);
-        let modifier_deck_section = document.getElementById("modifier-container");
-        if (!showmodifierdeck.checked) {
-            modifier_deck_section.style.display = "none";
+        applyDeckSelection(selectedDecks, false);
+        let modifierDeckSection = document.getElementById("modifier-container");
+        if (!showModifierCode.checked) {
+            modifierDeckSection.style.display = "none";
         }
         else {
-            modifier_deck_section.style.display = "block";
+            modifierDeckSection.style.display = "block";
         }
-        reset_round_counter();
+        resetRoundCounter();
     };
 
-    applyloadbtn.onclick = function () {
-        load_players();
-        load_round_counter();
-        let selected_deck_names = JSON.parse(get_from_storage("selected_deck_names"));
-        let selected_decks = selected_deck_names.map(function (deck_names) {
-            return load_ability_deck(deck_names.class, deck_names.name, deck_names.level);
+    applyLoadBtn.onclick = function () {
+        loadPlayers();
+        loadRoundCounter();
+        let selectedDeckNames = JSON.parse(getFromStorage("selectedDeckNames"));
+        let selectedDecks = selectedDeckNames.map(function (deckNames) {
+            return loadAbilityDeck(deckNames.class, deckNames.name, deckNames.level);
         });
-        apply_deck_selection(selected_decks, true);
-        let modifier_deck_section = document.getElementById("modifier-container");
-        if (!showmodifierdeck.checked) {
-            modifier_deck_section.style.display = "none";
+        applyDeckSelection(selectedDecks, true);
+        let modifierDeckSection = document.getElementById("modifier-container");
+        if (!showModifierCode.checked) {
+            modifierDeckSection.style.display = "none";
         }
         else {
-            modifier_deck_section.style.display = "block";
+            modifierDeckSection.style.display = "block";
         }
     };
 
-    function apply_players(e) {
+    function applyPlayers(e) {
         e.preventDefault();
-        playerlist.get_selection();
-        playerlist.update_global_players();
-        write_to_storage("players", JSON.stringify(players));
-        calculate_party_level();
+        playerList.getSelection();
+        playerList.updateGlobalPlayers();
+        writeToStorage("players", JSON.stringify(players));
+        calculatePartyLevel();
     }
 
-    function load_players() {
-        players = JSON.parse(get_from_storage("players"));
-        playerlist.set_selection(players);
-        calculate_party_level();
+    function loadPlayers() {
+        players = JSON.parse(getFromStorage("players"));
+        playerList.setSelection(players);
+        calculatePartyLevel();
     }
 
-    applyplayersbtn.onclick = apply_players;
-    playerinputform.onsubmit = apply_players;
+    applyPlayersBtn.onclick = applyPlayers;
+    playerInputForm.onsubmit = applyPlayers;
 
-    loadplayersbtn.onclick = load_players;
+    loadPlayersBtn.onclick = loadPlayers;
 
-    window.onresize = refresh_ui.bind(null, visible_ability_decks);
+    window.onresize = refreshUi.bind(null, visibleAbilityDecks);
 }

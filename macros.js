@@ -107,7 +107,7 @@ function expand_stat(s, stat, value)
     return s;
 }
 
-function attributes_to_lines(attributes)
+function attributesToLines(attributes)
 {
     if (!attributes || (attributes[0].length == 0 && attributes[1].length == 0))
     {
@@ -151,7 +151,7 @@ function attributes_to_lines(attributes)
     }
 }
 
-function immunities_to_lines(immunities)
+function immunitiesToLines(immunities)
 {
     if (!immunities)
     {
@@ -173,7 +173,7 @@ function immunities_to_lines(immunities)
     }
 }
 
-function notes_to_lines(notes)
+function notesToLines(notes)
 {
     return ["* <span class='small'> Notes: " + notes + "</span>"];
 }
@@ -187,7 +187,7 @@ function expand_special(s, special_value)
     });
 }
 
-function special_to_lines(s, special1, special2)
+function specialToLines(s, special1, special2)
 {
     if (special1 && s.indexOf("Special 1") !== -1)
     {
@@ -201,7 +201,7 @@ function special_to_lines(s, special1, special2)
     return s;
 }
 
-function expand_string(s, attack, move, range)
+function expandString(s, attack, move, range)
 {
     var re = new RegExp("%(attack|move|range)% (\\+|-)(\\d*)", "g");
     

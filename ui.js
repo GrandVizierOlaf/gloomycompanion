@@ -60,11 +60,11 @@ function init_ui()
 
     newroundbtn.onclick = function(e)
     {
-        draw_all_visible_ability_cards();
-        update_all_player_inits();
-        increment_round_counter();
+        drawAllVisibleAbilityCards();
+        updateAllPlayerInits();
+        incrementRoundCounter();
         
-        end_round();
+        endRound();
     }
 
     cancelarea.onclick = function(e)

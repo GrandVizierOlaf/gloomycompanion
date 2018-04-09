@@ -1,10 +1,10 @@
-//special_rules should be treated with some kind of macro that recognises them and applies them when loading
+//specialRules should be treated with some kind of macro that recognises them and applies them when loading
 SPECIAL_RULES =
 {
-    living_corpse_two_levels_extra:
+    livingCorpseTwoLevelsExtra:
         {   "description": "All living corpses are two levels higher than the scenario level, up to a max of 7",
             "affected_deck": "Living Corpse",
-            "extra_levels": 2
+            "extraLevels": 2
         }
 };
 
@@ -239,7 +239,7 @@ SCENARIO_DEFINITIONS =
             ,   {"name": "Sun Demon"}
             ]
         , special_rules:
-            [ SPECIAL_RULES.living_corpse_two_levels_extra
+            [ SPECIAL_RULES.livingCorpseTwoLevelsExtra
             ]
         },
         { name: "#29 Sanctuary of Gloom"
