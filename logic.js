@@ -23,6 +23,13 @@ var EVENT_NAMES = {
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
 
+function update_switch_initiative(deck_id, initiative) {
+    div = document.getElementById("switch-" + deck_id + "-initiative");
+    div.innerText = " (" + initiative + ")";
+    document.getElementById("switch-" + deck_id).classList.remove("switchroundover");
+    document.getElementById(deck_id).classList.remove("deckroundover");
+}
+
 function add_player(identifier, level, initiative = null) {
     if (!player) return;
 
@@ -235,7 +242,6 @@ function load_ability_deck(deck_class, deck_name, level) {
 
     var loaded_deck = JSON.parse(get_from_storage(deck_name));
 
-
     var deck = {
         class: deck_definition.class,
         name: deck_definition.name,
@@ -309,6 +315,7 @@ function load_ability_deck(deck_class, deck_name, level) {
             card.ui.flip_up(true);
             card.ui.removeClass("draw");
             card.ui.addClass("discard");
+            update_switch_initiative(this.deckid, card.initiative);
         }
         force_repaint_deck(this);
     }
@@ -390,6 +397,10 @@ function load_ability_deck(deck_class, deck_name, level) {
             this.discard[i].starting_lines = discard_pile[i].starting_lines;
         }
     }
+
+    deck.deckid = deck.get_real_name().replace(/\s+/g, '');
+
+    //add_deck_to_switch_list(deck);
 
     write_to_storage(deck.name, JSON.stringify(deck));
     return deck;
@@ -485,6 +496,8 @@ function flip_up_top_card(deck) {
     var card = deck.draw_pile.shift(card);
     send_to_discard(card, pull_animation = true);
     deck.discard.unshift(card);
+
+    update_switch_initiative(deck.deckid, card.initiative);
     return card;
 }
 
@@ -521,10 +534,7 @@ function draw_ability_card(deck) {
 
                 visible_cards[deck.deckid] = card;
 
-                div = document.getElementById("switch-" + visible_deck.deckid + "-initiative");
-                div.innerText = " (" + card.initiative + ")";
-                document.getElementById("switch-" + visible_deck.deckid).classList.remove("switchroundover");
-                document.getElementById(deck.deckid).classList.remove("deckroundover");
+                update_switch_initiative(deck.deckid, card.initiative);
             }
         });
     }
@@ -620,6 +630,7 @@ function load_modifier_deck() {
             discard: [],
             advantage_to_clean: false
         }
+
 
     deck.draw_top_discard = function() {
         if (this.discard.length > 0) {
@@ -820,7 +831,7 @@ function get_boss_stats(name, level) {
 
 function apply_deck_selection(decks, preserve_existing_deck_state) {
     var container = document.getElementById("tableau");
-    document.getElementById("switcheslist").innerHTML = "";
+    // document.getElementById("switcheslist").innerHTML = "";
     var decks_to_remove = visible_ability_decks.filter(function (visible_deck) {
         return !preserve_existing_deck_state || (decks.filter(function (deck) {
                 return ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))
@@ -863,15 +874,13 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     });
 
     visible_ability_decks.forEach(function (deck) {
-        deck.deckid = deck.get_real_name().replace(/\s+/g, '');
         add_deck_to_switch_list(deck);
     })
 
     decks_to_add.forEach(function (deck) {
-        var deckid = deck.get_real_name().replace(/\s+/g, '');
-        deck.deckid = deckid;
+        add_deck_to_switch_list(deck);
         var deck_space = document.createElement("div");
-        deck_space.id = deckid;
+        deck_space.id = deck.deckid;
         deck_space.addEventListener('contextmenu', function(e) {            
             this.className = "hiddendeck";
             e.preventDefault();
@@ -918,6 +927,8 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     });
 
     add_all_players_to_switch_list();
+
+    reorder_switches();
     
     // Rescale card text if necessary
     refresh_ui();

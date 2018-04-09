@@ -63,6 +63,8 @@ function init_ui()
         draw_all_visible_ability_cards();
         update_all_player_inits();
         increment_round_counter();
+        
+        end_round();
     }
 
     cancelarea.onclick = function(e)
