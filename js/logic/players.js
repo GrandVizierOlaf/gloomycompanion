@@ -88,7 +88,7 @@ function waitForModalClose(cb, arg) {
 }
 
 export function calculatePartyLevel() {
-    if (!window.players || window.players === {}) {
+    if (!window.players || (Object.keys(window.players).length === 0 && window.players.constructor === Object)) {
         return;
     }
     let levels = Object.keys(window.players).map(f => window.players[f].level);
