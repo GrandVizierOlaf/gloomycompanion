@@ -23,11 +23,11 @@ var EVENT_NAMES = {
     MODIFIER_DECK_SHUFFLE_REQUIRED: "modfierDeckShuffleRequired"
 };
 
-function add_player(identifier, level) {
+function add_player(identifier, level, initiative = null) {
     if (!player) return;
 
     character = {
-        initiative: null,
+        initiative: initiative,
         level: level,
         identifier: identifier
     };
@@ -1526,9 +1526,8 @@ function init() {
     }
 
     function load_players() {
-        var loaded_players = JSON.parse(get_from_storage("players"));
-        playerlist.set_selection(loaded_players);
-        playerlist.update_global_players();
+        players = JSON.parse(get_from_storage("players"));
+        playerlist.set_selection(players);
         calculate_party_level();
     }
 
