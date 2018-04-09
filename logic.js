@@ -392,6 +392,7 @@ function load_ability_deck(deck_class, deck_name, level) {
             this.draw_pile[i].starting_lines = draw_pile[i].starting_lines;
         }
         for (var i = 0; i < discard_pile.length; i++) {
+            // TODO: Uncaught TypeError: Cannot set property 'shuffle_next' of undefined
             this.discard[i].shuffle_next = discard_pile[i].shuffle_next;
             this.discard[i].initiative = discard_pile[i].initiative;
             this.discard[i].starting_lines = discard_pile[i].starting_lines;
@@ -839,8 +840,8 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
     });
 
     var decks_to_add = decks.filter(function (deck) {
-        return !preserve_existing_deck_state || (visible_ability_decks.filter(function (visible_deck) {
-                return ((deck.name == visible_deck.name) && (deck.level == visible_deck.level))
+        return !preserve_existing_deck_state || (all_ability_decks.filter(function (ability_deck) {
+                return ((deck.name == ability_deck.name) && (deck.level == ability_deck.level))
             }).length == 0);
     });
 
@@ -921,6 +922,7 @@ function apply_deck_selection(decks, preserve_existing_deck_state) {
         } else {
             force_repaint_deck(deck);
         }
+        all_ability_decks.push(deck);
         visible_ability_decks.push(deck);
         
         add_deck_to_switch_list(deck);
