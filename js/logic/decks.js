@@ -526,8 +526,10 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
             deck.setStatsMonster(getMonsterStats(deck.getRealName(), deck.level));
 
         }
+        // TODO: Don't show the top card if one hasn't been flipped before
+        // It's close if you check that discard.length > 1, but sometimes some will still flip and this feels hacky
         if (preserveExistingDeckState) {
-            //deck.drawTopDiscard();
+            deck.drawTopDiscard();
         } else {
             reshuffle(deck);
             forceRepaintDeck(deck);
