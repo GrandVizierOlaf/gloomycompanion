@@ -1,10 +1,20 @@
 "use strict";
 
-import {DECKS} from './cards.js';
-import {SCENARIO_DEFINITIONS, SPECIAL_RULES} from './scenarios.js';
-import {concatArrays, createInput, dictValues, getFromStorage, inputValue, isChecked, writeToStorage} from './util.js';
+import {DECKS} from './js/definitions/cards.js';
+import {SCENARIO_DEFINITIONS, SPECIAL_RULES} from './js/definitions/scenarios.js';
+import {
+    concatArrays,
+    createInput,
+    dictValues,
+    getFromStorage,
+    inputValue,
+    isChecked,
+    writeToStorage
+} from './js/logic/util.js';
 import {addPlayer} from "./js/logic/players.js";
-import {applyDeckSelection, loadAbilityDeck, reshuffleModifierDeck} from "./js/logic/decks.js";
+import {applyDeckSelection, loadAbilityDeck} from "./js/logic/decks.js";
+import {loadRoundCounter, resetRoundCounter} from "./js/logic/rounds";
+import {refreshUi} from "./ui";
 
 //TODO Adding an extra Guard deck will reshuffle the first one,
 // End of round with multiple Archers, resize text, worth to show common and elite_only attributes?,
@@ -17,31 +27,6 @@ window.visibleCards = {};
 window.modifierDeck = null;
 
 // This should be dynamic dependant on lines per card
-export function refreshUi() {
-    let actualCardHeight = 296;
-    let baseFontSize = 26.6;
-
-    let tableau = document.getElementById("tableau");
-    let cards = tableau.getElementsByClassName("card");
-    for (let i = 1; i < cards.length; i++) {
-        if (cards[i].className.indexOf("ability") !== -1) {
-            let scale = cards[i].getBoundingClientRect().height / actualCardHeight;
-            let scaledFontSize = baseFontSize * scale;
-
-            let fontPixelSize = Math.min(scaledFontSize, baseFontSize);
-            tableau.style.fontSize = fontPixelSize + "px";
-            break;
-        }
-    }
-}
-
-export function endRound() {
-    if (window.modifierDeck && window.modifierDeck.shuffleEndOfRound()) {
-        window.modifierDeck.cleanAdvantageDeck();
-        reshuffleModifierDeck(window.modifierDeck);
-    }
-    writeToStorage("modifierDeck", JSON.stringify(window.modifierDeck));
-}
 
 function LevelSelector(text, inline) {
     let maxLevel = 7;
@@ -141,43 +126,43 @@ function DeckList() {
 }
 
 function ScenarioList(scenarios) {
-    let scenariolist = {};
-    scenariolist.ul = document.createElement("ul");
-    scenariolist.ul.className = "selectionlist";
-    scenariolist.spinner = null;
-    scenariolist.decks = {};
-    scenariolist.specialRules = {};
-    scenariolist.levelSelector = null;
+    let scenarioList = {};
+    scenarioList.ul = document.createElement("ul");
+    scenarioList.ul.className = "selectionlist";
+    scenarioList.spinner = null;
+    scenarioList.decks = {};
+    scenarioList.specialRules = {};
+    scenarioList.levelSelector = null;
 
-    scenariolist.levelSelector = new LevelSelector("Select level", false);
+    scenarioList.levelSelector = new LevelSelector("Select level", false);
 
-    scenariolist.ul.appendChild(scenariolist.levelSelector.html);
+    scenarioList.ul.appendChild(scenarioList.levelSelector.html);
 
     for (let i = 0; i < scenarios.length; i++) {
         let scenario = scenarios[i];
-        scenariolist.decks[i] = scenario.decks;
-        scenariolist.specialRules[i] = scenario.specialRules ? scenario.specialRules : "";
+        scenarioList.decks[i] = scenario.decks;
+        scenarioList.specialRules[i] = scenario.specialRules ? scenario.specialRules : "";
     }
 
-    let listitem = document.createElement("li");
-    listitem.innerText = "Select scenario number";
-    scenariolist.ul.appendChild(listitem);
+    let listItem = document.createElement("li");
+    listItem.innerText = "Select scenario number";
+    scenarioList.ul.appendChild(listItem);
 
     let scenarioSpinner = createInput("number", "scenario_number", "1", "");
     scenarioSpinner.input.min = 1;
     scenarioSpinner.input.max = scenarios.length;
-    scenariolist.ul.appendChild(scenarioSpinner.input);
-    scenariolist.spinner = scenarioSpinner.input;
+    scenarioList.ul.appendChild(scenarioSpinner.input);
+    scenarioList.spinner = scenarioSpinner.input;
 
-    scenariolist.getSelection = function () {
+    scenarioList.getSelection = function () {
         // We're using the scenario index that is zero-based, but the scenario list is 1-based
-        let currentValue = scenariolist.spinner.value - 1;
+        let currentValue = scenarioList.spinner.value - 1;
         return Math.min(currentValue, scenarios.length + 1);
     };
 
-    scenariolist.getLevel = function (deckName, specialRules) {
+    scenarioList.getLevel = function (deckName, specialRules) {
 
-        let baseLevel = scenariolist.levelSelector.getSelection();
+        let baseLevel = scenarioList.levelSelector.getSelection();
 
         if ((specialRules.indexOf(SPECIAL_RULES.livingCorpseTwoLevelsExtra) >= 0) &&
             (deckName === SPECIAL_RULES.livingCorpseTwoLevelsExtra.affectedDeck)) {
@@ -188,42 +173,42 @@ function ScenarioList(scenarios) {
         }
     };
 
-    scenariolist.getScenarioDecks = function () {
+    scenarioList.getScenarioDecks = function () {
         return (this.decks[this.getSelection()].map(function (deck) {
             if (DECKS[deck.name]) {
                 deck.class = DECKS[deck.name].class;
             } else if (deck.name.indexOf("Boss") !== -1) {
                 deck.class = DECKS["Boss"].class;
             }
-            deck.level = scenariolist.getLevel(deck.name, scenariolist.getSpecialRules());
+            deck.level = scenarioList.getLevel(deck.name, scenarioList.getSpecialRules());
             return deck;
         }));
     };
 
-    scenariolist.getSpecialRules = function () {
+    scenarioList.getSpecialRules = function () {
         return this.specialRules[this.getSelection()];
     };
 
-    return scenariolist;
+    return scenarioList;
 }
 
 function PlayerList() {
-    let playerlist = [];
+    let playerList = [];
 
-    playerlist.getSelection = function () {
-        playerlist = [];
+    playerList.getSelection = function () {
+        playerList = [];
         for (let i = 1; i <= 4; i++) {
             let playerIdInput = document.getElementById("player" + i + "idinput");
             let playerLevelInput = document.getElementById("player" + i + "levelinput");
             let player = {};
             player.identifier = playerIdInput.value;
             player.level = playerLevelInput.value;
-            playerlist.push(player);
+            playerList.push(player);
         }
-        return playerlist;
+        return playerList;
     };
 
-    playerlist.setSelection = function (selectedPlayers) {
+    playerList.setSelection = function (selectedPlayers) {
         // Default out the inputs
         for (let i = 1; i <= 4; i++) {
             let playerIdInput = document.getElementById("player" + i + "idinput");
@@ -241,22 +226,22 @@ function PlayerList() {
                 let player = selectedPlayers[playerName];
                 playerIdInput.value = player.identifier;
                 playerLevelInput.value = player.level;
-                playerlist.push(player);
+                playerList.push(player);
                 i++;
             }
         }
     };
 
-    playerlist.updateGlobalPlayers = function () {
+    playerList.updateGlobalPlayers = function () {
         window.players = {};
-        for (let i = 0; i < playerlist.length; i++) {
-            if (playerlist[i].identifier) {
-                addPlayer(playerlist[i].identifier, playerlist[i].level);
+        for (let i = 0; i < playerList.length; i++) {
+            if (playerList[i].identifier) {
+                addPlayer(playerList[i].identifier, playerList[i].level);
             }
         }
     };
 
-    return playerlist;
+    return playerList;
 }
 
 function calculatePartyLevel() {
@@ -276,27 +261,6 @@ function calculatePartyLevel() {
             levelSelectors[selector].value = window.partyLevel;
         }
     }
-}
-
-function loadRoundCounter() {
-    let roundNum = getFromStorage("roundnumber");
-    if (!roundNum) {
-        roundNum = 0;
-    }
-    let counter = document.getElementById("roundcounter");
-    counter.innerText = roundNum;
-}
-
-function resetRoundCounter() {
-    localStorage.removeItem("roundnumber");
-    let counter = document.getElementById("roundcounter");
-    counter.innerText = "0";
-}
-
-export function incrementRoundCounter() {
-    let counter = document.getElementById("roundcounter");
-    counter.innerText++;
-    writeToStorage("roundnumber", counter.innerText);
 }
 
 function init() {
@@ -394,10 +358,10 @@ function init() {
     window.onresize = refreshUi.bind(null, window.visibleAbilityDecks);
 }
 
-if(window.attachEvent) {
+if (window.attachEvent) {
     window.attachEvent('onload', init);
 } else {
-    if(window.onload) {
+    if (window.onload) {
         let curronload = window.onload;
         window.onload = function (evt) {
             curronload(evt);

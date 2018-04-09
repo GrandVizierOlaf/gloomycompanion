@@ -1,4 +1,4 @@
-import {writeToStorage} from "../../util.js";
+import {writeToStorage} from "./util.js";
 import {updatePlayerInit} from "./players.js";
 
 export function updateSwitchInitiative(deckId, initiative) {

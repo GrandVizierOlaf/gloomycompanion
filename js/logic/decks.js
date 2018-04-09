@@ -1,11 +1,15 @@
-import {findInDiscard, getFromStorage, removeChild, shuffleList, writeToStorage} from "../../util.js";
-import {CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK} from "../../modifiers.js";
-import {endRound, refreshUi} from "../../logic.js";
+import {findInDiscard, getFromStorage, removeChild, shuffleList, writeToStorage} from "./util.js";
+import {CARD_TYPES_MODIFIER, MODIFIER_CARDS, MODIFIER_DECK} from "../definitions/modifiers.js";
+import {refreshUi} from "../../ui.js";
 import {addAllPlayersToSwitchList, addDeckToSwitchList, reorderSwitches, updateSwitchInitiative} from "./switches.js";
 import {defineModifierCard, createAbilityCardBack, createAbilityCardFront, UICard} from "./cards.js";
-import {attributesToLines, immunitiesToLines, notesToLines, specialToLines} from "../../macros.js";
-import {getBossStats, getMonsterStats} from "../../monster_stats.js";
-import {DECK_DEFINITIONS, DECKS} from "../../cards.js";
+import {specialToLines} from "./macros.js";
+import {getBossStats} from "./monster_stats.js";
+import {DECK_DEFINITIONS} from "../definitions/cards.js";
+import {DECKS} from "../definitions/cards";
+import {endRound} from "./rounds";
+import {attributesToLines, immunitiesToLines, notesToLines} from "./macros";
+import {getMonsterStats} from "./monster_stats";
 
 export const DECK_TYPES =
     {

@@ -1,8 +1,9 @@
 "use strict";
 
-import {incrementRoundCounter,endRound} from './logic.js';
+import {incrementRoundCounter} from './js/logic/rounds.js';
 import {updateAllPlayerInits} from "./js/logic/players.js";
 import {drawAllVisibleAbilityCards} from "./js/logic/decks.js";
+import {endRound} from "./js/logic/rounds";
 
 function activateTab(tabs, pages, activetab)
 {
@@ -91,5 +92,23 @@ if(window.attachEvent) {
         };
     } else {
         window.onload = initUi;
+    }
+}
+
+export function refreshUi() {
+    let actualCardHeight = 296;
+    let baseFontSize = 26.6;
+
+    let tableau = document.getElementById("tableau");
+    let cards = tableau.getElementsByClassName("card");
+    for (let i = 1; i < cards.length; i++) {
+        if (cards[i].className.indexOf("ability") !== -1) {
+            let scale = cards[i].getBoundingClientRect().height / actualCardHeight;
+            let scaledFontSize = baseFontSize * scale;
+
+            let fontPixelSize = Math.min(scaledFontSize, baseFontSize);
+            tableau.style.fontSize = fontPixelSize + "px";
+            break;
+        }
     }
 }

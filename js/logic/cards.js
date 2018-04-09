@@ -1,5 +1,5 @@
-import {removeEmptyStrings, toggleClass} from "../../util.js";
-import {expandString} from "../../macros.js";
+import {removeEmptyStrings, toggleClass} from "./util.js";
+import {expandString} from "./macros.js";
 
 export function UICard(frontElement, backElement) {
     let card = {};
@@ -180,3 +180,5 @@ export function defineModifierCard(cardDefinition) {
 
     return card;
 }
+
+

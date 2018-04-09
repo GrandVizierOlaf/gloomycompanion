@@ -1,5 +1,5 @@
 import {addPlayerToSwitchList, reorderSwitches} from "./switches.js";
-import {writeToStorage} from "../../util.js";
+import {writeToStorage} from "./util.js";
 
 let modalOpen = false;
 
