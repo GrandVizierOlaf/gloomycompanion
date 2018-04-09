@@ -1232,7 +1232,7 @@ function DeckList() {
     listitem.appendChild(global_level_selector.html);
     decklist.global_level_selector = global_level_selector;
 
-    var dom_dict = create_input("button", "applylevel", "Apply All", "");
+    var dom_dict = create_input("button", "applylevel", "Apply to All", "");
     dom_dict.input.onclick = function () {
         for (key in decklist.level_selectors) {
             decklist.level_selectors[key].set_value(decklist.global_level_selector.get_selection());
