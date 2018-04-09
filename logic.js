@@ -975,7 +975,7 @@ function update_player_init(player) {
     initiative = document.getElementById("switch-" + player.identifier + "-initiative");
     var modal_form = document.createElement('form');
     modal_form.id = "modal_form";
-    modal_form.innerText = 'Enter initiative for ' + player.identifier;
+    modal_form.innerText = 'Enter initiative for ' + player.identifier + ': ';
     var modal_input = document.createElement('input');
     modal_input.id = 'modal_input';
     modal_input.pattern = "\\d{0,2}";
