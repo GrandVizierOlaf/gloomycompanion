@@ -125,7 +125,7 @@ export function loadAbilityDeck(deckClass, deckName, level) {
             card.ui.flipUp(true);
             card.ui.removeClass("draw");
             card.ui.addClass("discard");
-            updateSwitchInitiative(this.deckid, card.initiative);
+            updateSwitchInitiative(this.deckId, card.initiative);
         }
         forceRepaintDeck(this);
     };
@@ -203,13 +203,14 @@ export function loadAbilityDeck(deckClass, deckName, level) {
         }
         for (let i = 0; i < discardPile.length; i++) {
             // TODO: Uncaught TypeError: Cannot set property 'shuffleNext' of undefined
+            // This happens when two decks are supposed to be synced, but they have different discards
             this.discard[i].shuffleNext = discardPile[i].shuffleNext;
             this.discard[i].initiative = discardPile[i].initiative;
             this.discard[i].startingLines = discardPile[i].startingLines;
         }
     };
 
-    deck.deckid = deck.getRealName().replace(/\s+/g, "");
+    deck.deckId = deck.getRealName().replace(/\s+/g, "");
 
     writeToStorage(deck.name, JSON.stringify(deck));
     return deck;
@@ -491,7 +492,7 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
     decksToAdd.forEach(function (deck) {
         addDeckToSwitchList(deck);
         let deckSpace = document.createElement("div");
-        deckSpace.id = deck.deckid;
+        deckSpace.id = deck.deckId;
         deckSpace.className = "card-container";
 
         container.appendChild(deckSpace);
@@ -679,7 +680,12 @@ function sendToDiscard(card, pullAnimation) {
 }
 
 export function drawAllVisibleAbilityCards() {
-    window.visibleAbilityDecks.forEach(function (visibleDeck) {
+    // Limit it to only unique decks
+    let decks = window.visibleAbilityDecks.filter((obj, pos, arr) => {
+        return arr.map(mapObj => mapObj["class"]).indexOf(obj["class"]) === pos;
+    });
+
+    decks.forEach(function (visibleDeck) {
         drawAbilityCard(visibleDeck);
     });
 }
@@ -696,9 +702,9 @@ function drawAbilityCard(deck) {
                 visibleDeck.drawTopCard();
                 let card = flipUpTopCard(visibleDeck);
 
-                window.visibleCards[deck.deckid] = card;
+                window.visibleCards[deck.deckId] = card;
 
-                updateSwitchInitiative(deck.deckid, card.initiative);
+                updateSwitchInitiative(deck.deckId, card.initiative);
             }
         });
     }

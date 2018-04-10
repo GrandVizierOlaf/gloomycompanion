@@ -107,7 +107,7 @@ export function addAllPlayersToSwitchList() {
 
 export function addDeckToSwitchList(deck) {
     // Don't put a new switch if one already exists
-    if (document.getElementById("switch-" + deck.deckid)) {
+    if (document.getElementById("switch-" + deck.deckId)) {
         return;
     }
 
@@ -116,12 +116,12 @@ export function addDeckToSwitchList(deck) {
     listItem.className = "switch noselect";
     switchesList.appendChild(listItem);
     let label = document.createElement("a");
-    label.id = "switch-" + deck.deckid;
+    label.id = "switch-" + deck.deckId;
     label.innerText = deck.getRealName();
     let initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
-    if (deck.deckid in window.visibleCards) {
-        initiative.innerText = " (" + window.visibleCards[deck.deckid].initiative + ")";
+    if (deck.deckId in window.visibleCards) {
+        initiative.innerText = " (" + window.visibleCards[deck.deckId].initiative + ")";
     } else {
         initiative.innerText = " (??)";
     }
@@ -166,7 +166,7 @@ export function addDeckToSwitchList(deck) {
 }
 
 export function removeDeckFromSwitchList(deck) {
-    let div = document.getElementById("switch-" + deck.deckid);
+    let div = document.getElementById("switch-" + deck.deckId);
 
     if (div) {
         let switchesList = document.getElementById("switcheslist");
