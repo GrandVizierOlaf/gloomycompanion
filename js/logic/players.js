@@ -27,6 +27,7 @@ export function getNewPlayerInitiative(player) {
     modalForm.appendChild(modalSubmit);
     Modal.open({
         openCallback: function () {
+            console.log("Opening modal");
             modalOpen = true;
             // TODO: Don't show keypad on mobile devices
             let modalInputSel = $("#modalInput");
@@ -39,15 +40,20 @@ export function getNewPlayerInitiative(player) {
                         "789" + $.keypad.BACK,
                         $.keypad.SPACE + "0"],
                     onClose: function (value, inst) {
+                        console.log("Closing keypad");
                         modalInput.value = value;
-                        Modal.close();
+                        if (modalOpen) {
+                            Modal.close();
+                        }
                     }
                 }
             );
             modalInputSel.keypad("show");
         },
         content: modalForm.outerHTML,
+        lock: true,
         closeCallback: function () {
+            console.log("Closing modal");
             player.initiative = modalInput.value;
             updatePlayerSwitchInitiative(player);
             reorderSwitches();
