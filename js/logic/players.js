@@ -14,7 +14,7 @@ export function addPlayer(identifier, level, initiative = null) {
     addPlayerToSwitchList(character);
 }
 
-export function updatePlayerInit(player) {
+export function updatePlayerInitiative(player) {
     let listItem = document.getElementById("switch-" + player.identifier);
     let initiative = document.getElementById("switch-" + player.identifier + "-initiative");
     let modalForm = document.createElement("form");
@@ -30,8 +30,9 @@ export function updatePlayerInit(player) {
     Modal.open({
         openCallback: function () {
             modalOpen = true;
-            let modalInput = $("#modalInput");
-            modalInput.keypad(
+            // TODO: Don't show keypad on mobile devices
+            let modalInputSel = $("#modalInput");
+            modalInputSel.keypad(
                 {
                     keypadOnly: false,
                     showAnim: "",
@@ -46,7 +47,7 @@ export function updatePlayerInit(player) {
                     }
                 }
             );
-            modalInput.keypad("show");
+            modalInputSel.keypad("show");
         },
         content: modalForm.outerHTML,
         closeCallback: function () {
@@ -74,7 +75,7 @@ export function updatePlayerInit(player) {
 export function updateAllPlayerInits() {
     for (let playerName in window.players) {
         if (window.players.hasOwnProperty(playerName)) {
-            waitForModalClose(updatePlayerInit, window.players[playerName]);
+            waitForModalClose(updatePlayerInitiative, window.players[playerName]);
         }
     }
 }

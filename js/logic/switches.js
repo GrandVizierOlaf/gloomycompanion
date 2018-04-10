@@ -1,5 +1,5 @@
 import {writeToStorage} from "./util.js";
-import {updatePlayerInit} from "./players.js";
+import {updatePlayerInitiative} from "./players.js";
 
 export function updateSwitchInitiative(deckId, initiative) {
     let div = document.getElementById("switch-" + deckId + "-initiative");
@@ -72,7 +72,7 @@ export function addPlayerToSwitchList(player) {
     }, false);
     label.addEventListener("dblclick", function () {
         label.classList.remove("switchroundover");
-        updatePlayerInit(player);
+        updatePlayerInitiative(player);
     }, false);
     listItem.appendChild(label);
     writeToStorage("players", JSON.stringify(window.players));
