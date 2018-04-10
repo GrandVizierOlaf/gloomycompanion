@@ -1,4 +1,4 @@
-import {addPlayerToSwitchList, reorderSwitches} from "./switches.js";
+import {addPlayerToSwitchList, updatePlayerSwitchInitiative, reorderSwitches} from "./switches.js";
 import {writeToStorage} from "./util.js";
 
 let modalOpen = false;
@@ -14,9 +14,7 @@ export function addPlayer(identifier, level, initiative = null) {
     addPlayerToSwitchList(character);
 }
 
-export function updatePlayerInitiative(player) {
-    let listItem = document.getElementById("switch-" + player.identifier);
-    let initiative = document.getElementById("switch-" + player.identifier + "-initiative");
+export function getNewPlayerInitiative(player) {
     let modalForm = document.createElement("form");
     modalForm.id = "modalForm";
     modalForm.innerText = "Enter initiative for " + player.identifier + ": ";
@@ -41,7 +39,6 @@ export function updatePlayerInitiative(player) {
                         "789" + $.keypad.BACK,
                         $.keypad.SPACE + "0"],
                     onClose: function (value, inst) {
-                        console.log(value);
                         modalInput.value = value;
                         Modal.close();
                     }
@@ -51,15 +48,8 @@ export function updatePlayerInitiative(player) {
         },
         content: modalForm.outerHTML,
         closeCallback: function () {
-            let newInit = modalInput.value;
-            player.initiative = newInit;
-            if (!newInit) {
-                newInit = "??";
-            } else {
-                listItem.classList.remove("switchremoved");
-                listItem.classList.remove("switchroundover");
-            }
-            initiative.innerText = " (" + newInit + ")";
+            player.initiative = modalInput.value;
+            updatePlayerSwitchInitiative(player);
             reorderSwitches();
             writeToStorage("players", JSON.stringify(window.players));
             modalOpen = false;
@@ -75,7 +65,7 @@ export function updatePlayerInitiative(player) {
 export function updateAllPlayerInits() {
     for (let playerName in window.players) {
         if (window.players.hasOwnProperty(playerName)) {
-            waitForModalClose(updatePlayerInitiative, window.players[playerName]);
+            waitForModalClose(getNewPlayerInitiative, window.players[playerName]);
         }
     }
 }

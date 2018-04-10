@@ -8,7 +8,7 @@ import {
     addDeckToSwitchList,
     removeDeckFromSwitchList,
     reorderSwitches,
-    updateSwitchInitiative
+    updateDeckSwitchInitiative
 } from "./switches.js";
 import {defineModifierCard, createAbilityCardBack, createAbilityCardFront, UICard} from "./cards.js";
 import {specialToLines} from "./macros.js";
@@ -125,7 +125,7 @@ export function loadAbilityDeck(deckClass, deckName, level) {
             card.ui.flipUp(true);
             card.ui.removeClass("draw");
             card.ui.addClass("discard");
-            updateSwitchInitiative(this.deckId, card.initiative);
+            updateDeckSwitchInitiative(this.deckId, card.initiative);
         }
         forceRepaintDeck(this);
     };
@@ -372,7 +372,7 @@ export function loadModifierDeck() {
     deck.addCard = function (cardType) {
         // Rulebook p. 23: "a maximum of only 10 curse [and 10 bless] cards can be placed into any one deck"
         if (this.count(cardType) < 10) {
-            // TOOD: Brittle
+            // TODO: Brittle
             deck.drawPile.push(defineModifierCard(MODIFIER_CARDS[cardType.toUpperCase()]));
 
             forceRepaintDeck(deck);
@@ -591,17 +591,6 @@ function addModifierDeck(container, deck, preserveDiscards) {
         return widgetContainer;
     }
 
-    function indicateShuffleRequired(e) {
-        if (e.detail.shuffle) {
-            window.setTimeout(function () {
-                endRoundDiv.className = "counter-icon shuffle";
-            }, 400);
-        }
-        else {
-            endRoundDiv.className = "counter-icon shuffle not-required";
-        }
-    }
-
     let modifierContainer = document.createElement("div");
     modifierContainer.className = "card-container";
     modifierContainer.id = "modifier-container";
@@ -641,7 +630,7 @@ function reshuffle(deck, includeDiscards) {
     // This way we keep sync several decks from the same class
     window.visibleAbilityDecks.forEach(function (visibleDeck) {
         if ((visibleDeck !== deck) && (visibleDeck.class === deck.class)) {
-            shuffleDeck(visibleDeck, includeDiscards);
+            shuffleDeck(visibleDeck, true);
             visibleDeck.setCardPiles(deck.drawPile, deck.discard);
         }
     });
@@ -704,7 +693,7 @@ function drawAbilityCard(deck) {
 
                 window.visibleCards[deck.deckId] = card;
 
-                updateSwitchInitiative(deck.deckId, card.initiative);
+                updateDeckSwitchInitiative(deck.deckId, card.initiative);
             }
         });
     }

@@ -1,11 +1,26 @@
 import {writeToStorage} from "./util.js";
-import {updatePlayerInitiative} from "./players.js";
+import {getNewPlayerInitiative} from "./players.js";
 
-export function updateSwitchInitiative(deckId, initiative) {
-    let div = document.getElementById("switch-" + deckId + "-initiative");
-    div.innerText = " (" + initiative + ")";
-    document.getElementById("switch-" + deckId).classList.remove("switchroundover");
+export function updateDeckSwitchInitiative(deckId, initiative) {
+    let listItem = document.getElementById("switch-" + deckId);
+    let initDiv = document.getElementById("switch-" + deckId + "-initiative");
+    initDiv.innerText = " (" + initiative + ")";
+    listItem.classList.remove("switchroundover");
     document.getElementById(deckId).classList.remove("deckroundover");
+}
+
+export function updatePlayerSwitchInitiative(player) {
+    let newInit;
+    let listItem = document.getElementById("switch-" + player.identifier);
+    let initiative = document.getElementById("switch-" + player.identifier + "-initiative");
+    if (!player.initiative) {
+        newInit = "??";
+    } else {
+        newInit = player.initiative;
+        listItem.classList.remove("switchremoved");
+        listItem.classList.remove("switchroundover");
+    }
+    initiative.innerText = " (" + newInit + ")";
 }
 
 export function reorderSwitches() {
@@ -72,7 +87,7 @@ export function addPlayerToSwitchList(player) {
     }, false);
     label.addEventListener("dblclick", function () {
         label.classList.remove("switchroundover");
-        updatePlayerInitiative(player);
+        getNewPlayerInitiative(player);
     }, false);
     listItem.appendChild(label);
     writeToStorage("players", JSON.stringify(window.players));
