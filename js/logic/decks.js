@@ -370,6 +370,9 @@ export function loadModifierDeck() {
         break;
       }
     }
+
+    let counter = document.getElementById('cardsLeftCounter');
+    counter.innerText = deck.drawPile.length.toString();
     writeToStorage('modifierDeck', JSON.stringify(window.modifierDeck));
 
     return this.count(cardType);
@@ -602,9 +605,10 @@ function addModifierDeck(container, deck, preserveDiscards) {
 
   function indicateShuffleRequired(e) {
     if (e.detail.shuffle) {
+        // Wait until the card is fully displayed before indicating the shuffle
       window.setTimeout(function () {
         endRoundDiv.className = "counter-icon shuffle";
-      }, 100);
+      }, 150);
     }
     else {
       endRoundDiv.className = "counter-icon shuffle not-required";
