@@ -279,7 +279,6 @@ function init() {
         else {
             modifierDeckSection.style.display = "block";
         }
-        resetRoundCounter();
     };
 
     applyScenarioBtn.onclick = function () {
