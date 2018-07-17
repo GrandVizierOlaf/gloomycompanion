@@ -3,6 +3,11 @@ import {writeToStorage} from "./util.js";
 
 let modalOpen = false;
 
+$.keypad.addKeyDef('NN', 'nn', function(inst) {
+  this.val('99').focus();
+  $.keypad.hide();
+});
+
 export function addPlayer(identifier, level, initiative = null) {
     let character = {
         initiative: initiative,
@@ -35,7 +40,8 @@ export function getNewPlayerInitiative(player) {
                 {
                     keypadOnly: false,
                     showAnim: "",
-                    layout: ["123",
+                    nnText: "99",
+                    layout: ["123" + $.keypad.NN,
                         "456" + $.keypad.CLEAR,
                         "789" + $.keypad.BACK,
                         $.keypad.SPACE + "0"],
