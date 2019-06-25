@@ -430,14 +430,15 @@ export function loadModifierDeck() {
   }.bind(deck);
   let loadedDeck = JSON.parse(getFromStorage('modifierDeck'));
 
-  MODIFIER_DECK.forEach(function (cardDefinition) {
+  if (loadedDeck) {
+    deck.discard = Object.assign({}, loadedDeck.discard);    
+    deck.drawPile = Object.assign({}, loadedDeck.drawPile);
+  } else {
+   MODIFIER_DECK.forEach(function (cardDefinition) {
     let card = defineModifierCard(cardDefinition);
-    if (loadedDeck && findInDiscardAndRemove(loadedDeck.discard, card.cardType)) {
-      deck.discard.push(card);
-    } else {
-      deck.drawPile.push(card);
-    }
-  });
+    deck.drawPile.push(card);
+  }); 
+  }
 
   return deck;
 }
