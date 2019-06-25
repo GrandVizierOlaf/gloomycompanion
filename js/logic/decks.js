@@ -566,7 +566,7 @@ function initModifierDeck() {
 }
 
 function addModifierDeck(container, deck, preserveDiscards) {
-  function createCounter(cardType, incrementFunc, decrementFunc) {
+  function createCounter(cardType, incrementFunc, decrementFunc, currCount) {
     function createButton(className, text, func, textElement) {
       let button = document.createElement('div');
       button.className = className + ' button';
@@ -588,7 +588,7 @@ function addModifierDeck(container, deck, preserveDiscards) {
 
     let textElement = document.createElement('div');
     textElement.className = 'icon-text';
-    textElement.innerText = '0';
+    textElement.innerText = currCount;
 
     widgetContainer.appendChild(createButton('decrement', '-', decrementFunc, textElement));
     widgetContainer.appendChild(textElement);
@@ -621,9 +621,12 @@ function addModifierDeck(container, deck, preserveDiscards) {
 
   let buttonDiv = document.createElement('div');
   buttonDiv.className = 'modifier-deck-column-1';
+  
+  let blessCount = deck.drawPile.filter(d => d.cardType === "bless").length;
+  let curseCount = deck.drawPile.filter(d => d.cardType === "curse").length
 
-  buttonDiv.appendChild(createCounter('bless', deck.addCard, deck.removeCard));
-  buttonDiv.appendChild(createCounter('curse', deck.addCard, deck.removeCard));
+  buttonDiv.appendChild(createCounter('bless', deck.addCard, deck.removeCard, blessCount));
+  buttonDiv.appendChild(createCounter('curse', deck.addCard, deck.removeCard, curseCount));
 
   let endRoundDiv = document.createElement("div");
   endRoundDiv.className = "counter-icon shuffle not-required";
