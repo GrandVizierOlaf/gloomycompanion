@@ -431,8 +431,8 @@ export function loadModifierDeck() {
   let loadedDeck = JSON.parse(getFromStorage('modifierDeck'));
 
   if (loadedDeck) {
-    Object.keys(loadedDeck.discard).forEach(c => deck.discard.push(loadedDeck.discard[c]));
-    Object.keys(loadedDeck.drawPile).forEach(c => deck.drawPile.push(loadedDeck.drawPile[c]));
+    Object.keys(loadedDeck.discard).forEach(c => deck.discard.push(defineModifierCard(MODIFIER_CARDS[loadedDeck.discard[c].cardType.toUpperCase()])));
+    Object.keys(loadedDeck.drawPile).forEach(c => deck.drawPile.push(defineModifierCard(MODIFIER_CARDS[loadedDeck.drawPile[c].cardType.toUpperCase()])));
   } else {
    MODIFIER_DECK.forEach(function (cardDefinition) {
     let card = defineModifierCard(cardDefinition);
