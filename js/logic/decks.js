@@ -507,6 +507,7 @@ export function applyDeckSelection(decks, preserveExistingDeckState) {
     let deckSpace = document.createElement('div');
     deckSpace.id = deck.deckId;
     deckSpace.className = 'card-container';
+    deckSpace.title = "Click to draw enemy ability";
 
     container.appendChild(deckSpace);
 
@@ -567,7 +568,7 @@ function initModifierDeck() {
 }
 
 function addModifierDeck(container, deck, preserveDiscards) {
-  function createCounter(cardType, incrementFunc, decrementFunc, currCount) {
+  function createCounter(cardType, incrementFunc, decrementFunc, currCount, title) {
     function createButton(className, text, func, textElement) {
       let button = document.createElement('div');
       button.className = className + ' button';
@@ -582,6 +583,7 @@ function addModifierDeck(container, deck, preserveDiscards) {
 
     let widgetContainer = document.createElement('div');
     widgetContainer.className = 'counter-icon';
+    widgetContainer.title = title;
 
     let background = document.createElement('div');
     background.className = 'background ' + cardType;
@@ -624,13 +626,14 @@ function addModifierDeck(container, deck, preserveDiscards) {
   buttonDiv.className = 'modifier-deck-column-1';
   
   let blessCount = deck.drawPile.filter(d => d.cardType === "bless").length;
-  let curseCount = deck.drawPile.filter(d => d.cardType === "curse").length
+  let curseCount = deck.drawPile.filter(d => d.cardType === "curse").length;
 
-  buttonDiv.appendChild(createCounter('bless', deck.addCard, deck.removeCard, blessCount));
-  buttonDiv.appendChild(createCounter('curse', deck.addCard, deck.removeCard, curseCount));
+  buttonDiv.appendChild(createCounter('bless', deck.addCard, deck.removeCard, blessCount, "Bless cards"));
+  buttonDiv.appendChild(createCounter('curse', deck.addCard, deck.removeCard, curseCount, "Curse cards"));
 
   let endRoundDiv = document.createElement("div");
   endRoundDiv.className = "counter-icon shuffle not-required";
+  endRoundDiv.title = "Click to end round and shuffle";
 
   document.body.addEventListener(EVENT_NAMES.MODIFIER_DECK_SHUFFLE_REQUIRED, indicateShuffleRequired);
 
@@ -641,10 +644,12 @@ function addModifierDeck(container, deck, preserveDiscards) {
 
   let deckSpace = document.createElement('div');
   deckSpace.className = 'card-container modifier';
+  deckSpace.title = "Click to draw one card";
 
   let drawTwoButton = document.createElement('div');
   drawTwoButton.className = 'button draw-two';
   drawTwoButton.onclick = doubleDraw.bind(null, window.modifierDeck);
+  drawTwoButton.title = "Click to draw two cards";
 
   let cardsLeftCounter = document.createElement('div');
   cardsLeftCounter.id = "cardsLeftCounter";

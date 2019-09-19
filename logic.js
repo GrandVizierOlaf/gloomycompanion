@@ -282,7 +282,7 @@ function init() {
     };
 
     applyScenarioBtn.onclick = function () {
-        localStorage.removeItem("selectedDeckNames");
+        try { localStorage.clear(); } catch (e) { console.error('Local storage is required'); return; }
         let selectedDeckNames = scenarioList.getScenarioDecks();
         writeToStorage("selectedDeckNames", JSON.stringify(selectedDeckNames));
         deckList.setSelection(selectedDeckNames);

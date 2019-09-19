@@ -1,31 +1,50 @@
 
-body
-{
-    margin:             0;
-    overflow-x:         hidden;
+body {
+    margin: 0;
+    overflow-x: hidden;
 
-    margin-top:         10px;
+    margin-top: 10px;
+    font-family: Helvetica, Arial, sans-serif;
+    background: #404040;
 }
 
-.nobr
-{
-    white-space:        nowrap;
+.nobr {
+    white-space: nowrap;
 }
 
-#tableau
-{
-    display:            -webkit-box;
+input[type="button"] {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin: 0.6em 0;
+    padding: 1em 0.6em;
+    background: #222;
+    color: white;
+    border: none;
+    font-size: 1rem;
+    border-radius: 4px;
+}
+
+input[type="number"] {
+    padding: 0.3em 0.6em;
+    font-size: 1.2rem;
+    margin: 0.6em 0;
+    min-width: 20px;
+}
+
+#tableau {
+    display: -webkit-box;
     -webkit-box-orient: horizontal;
-    -webkit-box-pack:   center;
-    -webkit-box-lines:  multiple;
+    -webkit-box-pack: center;
+    -webkit-box-lines: multiple;
 
-    display:            -webkit-flex;
-    -webkit-flex-wrap:  wrap;
+    display: -webkit-flex;
+    -webkit-flex-wrap: wrap;
     -webkit-justify-content: space-around;
 
-    display:            flex;
-    flex-wrap:          wrap;
-    justify-content:    space-around;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 @media only screen and (max-height: 480px) and (orientation: portrait) {
@@ -34,116 +53,100 @@ body
     }
 }
 
-ul.tabcontainer
-{
-    display:            -webkit-box;
+ul.tabcontainer {
+    display: -webkit-box;
     -webkit-box-orient: horizontal;
-
-    display:            flex;
-    margin:             0;
-    padding:            0;
-    list-style:         none;
+    display: flex;
+    padding: 16px 16px 0 16px;
+    margin: 0 0 1em;
+    list-style: none;
+    background: #f0f5f9;
 }
 
-ul.tabcontainer li
-{
-    -webkit-box-flex:   1;
-    flex:               1 1 0;
-
-    text-align:         center;
-    padding:            1em;
-    cursor:             pointer;
+ul.tabcontainer li {
+    -webkit-box-flex: 1;
+    flex: 1 1 0;
+    text-align: center;
+    padding: 0.4em 1em 1em;
+    cursor: pointer;
+    color: #222;
+    font-weight: bold;
+    border-bottom: solid 3px #222;
 }
 
-ul.tabcontainer li:not(:first-child)
-{
-    border-left:        1px solid black;
+ul.tabcontainer .inactive {
+    opacity: 0.5;
+    border-bottom-color: transparent;
 }
 
-ul.tabcontainer .inactive
-{
-    background-color:   #CCCCCC;
-}
-
-.tabbody
-{
-    padding:            1em;
-    margin-bottom:      4em;
+.tabbody {
+    padding: 1em;
+    margin-bottom: 4em;
     width: 300px;
 }
 
-.tabbody.inactive
-{
-    height:             0;
-    margin-top:         0;
-    margin-bottom:      0;
-    padding-top:        0;
-    padding-bottom:     0;
-    overflow:           hidden;
+.tabbody.inactive {
+    height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
 }
 
-.selectionlist
-{
-    list-style:         none;
-    padding:            0;
+.selectionlist {
+    list-style: none;
+    padding: 0;
 }
 
-.panecontainer
-{
-    position:           fixed;
-    top:                0;
-    left:               0;
-    max-width:          100vw;
-    height:             0;
-    z-index:            2;
+.panecontainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    max-width: 100vw;
+    height: 0;
+    z-index: 2;
 }
 
-.pane
-{
-    position:           relative;
-    left:               0;
-    height:             100vh;
-    overflow-x:         hidden;
-    overflow-y:         auto;
-    background:         white;
-    box-shadow:         1em 0 1em rgba(0, 0, 0, 0.5);
-    -webkit-transition: left 0.2s ease;
-    transition:         left 0.2s ease;
-    z-index:            1;
+.pane {
+    position: relative;
+    left: 0;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: white;
+    box-shadow: 1em 0 4em rgba(0, 0, 0, 0.5);
+    -webkit-transition: left 0.25s ease-in-out;
+    transition: left 0.25s ease-in-out;
+    z-index: 1;
 }
 
-.pane.inactive
-{
-    left:               -110%; /* fallback */
-    left:               calc(-100% - 2em);
+.pane.inactive {
+    left: -110%; /* fallback */
+    left: calc(-100% - 2em);
 }
 
-.playeridinput
-{
+.playeridinput {
     width: 75%;
 }
 
-.playeridheader
-{
+.playeridheader {
     width: 75%;
     float: left;
 }
 
-.playerlevelinput
-{
+.playerlevelinput {
     margin-left: 5px;
     width: 10%;
 }
 
-.playerlevelheader
-{
+.playerlevelheader {
     margin-left: 9px;
     width: 10%;
     float: left;
 }
 
-.hiddendeck
-{
+.hiddendeck {
     display: none;
 }
 
@@ -153,8 +156,8 @@ ul.switcheslist {
     padding: 0;
     padding-left: 10px;
     overflow: hidden;
-    font-family:                'PirataOne';
-    font-size:                  130%;
+    font-family: 'PirataOne';
+    font-size: 130%;
 }
 
 li.switch {
@@ -173,6 +176,7 @@ li.switch a {
     text-align: center;
     padding: 10px;
     text-decoration: none;
+    color: #fff;
 }
 
 li.switch a.switchroundover {
@@ -184,38 +188,40 @@ li.switch a:hover {
 }
 
 .noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    /* Non-prefixed version, currently
+                                     supported by Chrome and Opera */
 }
 
-#settingsbtn {
-    float: left;
-}
-
-#cancelarea
-{
-    position:           absolute;
-    left:               0;
-    top:                0;
-    width:              100vw;
-    height:             100vh;
-    background-color:   rgba(0, 0, 0, 0.5);
-    z-index:            0;
+#cancelarea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 0;
 }
 
 #settingsbtn
 {
+    float: left;
     margin-left:        1em;
     margin-top:         1em;
     width:              5ch;
     height:             5ch;
     cursor:             pointer;
     z-index:            1;
+}
+
+#settingsbtn:focus {
+    outline: 0 none;
+    background: #555;
 }
 
 #newroundbtn
@@ -231,6 +237,7 @@ li.switch a:hover {
 
 #roundcounter
 {
+    color: #fff;
     margin-left:        2.4em;
     width:              5ch;
     cursor:             pointer;

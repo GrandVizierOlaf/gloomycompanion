@@ -133,6 +133,7 @@ export function addDeckToSwitchList(deck) {
     let label = document.createElement("a");
     label.id = "switch-" + deck.deckId;
     label.innerText = deck.getRealName();
+    label.title = "Click to show/hide deck";
     let initiative = document.createElement("span");
     initiative.id = label.id + "-initiative";
     if (deck.deckId in window.visibleCards) {
