@@ -62,7 +62,7 @@ export function dictValues(dict)
     for (let key in dict) {
         values.push(dict[key]);
     }
-    
+
     return values;
 }
 
@@ -87,12 +87,13 @@ export function removeEmptyStrings(array)
 }
 
 export function writeToStorage(name, value) {
-    localStorage.setItem(name, value);
+    try { localStorage.setItem(name, value); } catch (e) { console.error('Local storage is required'); return; }
     console.log("Wrote " + name + " to local storage, with value: " + value);
+    // console.info("Local storage write:", name, value);
 }
 
 export function getFromStorage(name) {
-    return localStorage.getItem(name);
+    try { return localStorage.getItem(name); } catch (e) { console.error('Local storage is required'); return; }
 }
 
 export function findInDiscard(discard, id) {

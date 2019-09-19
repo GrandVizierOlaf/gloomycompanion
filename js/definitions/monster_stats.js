@@ -6712,7 +6712,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6733,7 +6733,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6754,7 +6754,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6775,7 +6775,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6796,7 +6796,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6817,7 +6817,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6838,7 +6838,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -6859,7 +6859,7 @@ export const MONSTER_STATS = {
             "%attack% +0 %boss-aoe-elder-drake-sp1%"
           ],
           "special2": [
-            "%move% and summon 2 Zephyrs"
+            "Summon 2 Zephyrs and %move%"
           ],
           "immunities": [
             "%wound%",
@@ -8262,4 +8262,3 @@ export const MONSTER_STATS = {
     }
   }
 };
-
