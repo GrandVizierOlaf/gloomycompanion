@@ -17,7 +17,7 @@ function activateTab(tabs, pages, activetab)
     }
 }
 
-function showSettingsPane(pane, cancelarea, show)
+export function showSettingsPane(pane, cancelarea, show)
 {
     pane.className = show ? "pane" : "pane inactive";
     cancelarea.style.display = show ? "initial" : "none";

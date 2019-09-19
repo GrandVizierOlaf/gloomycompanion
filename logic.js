@@ -12,11 +12,10 @@ import {
     isChecked,
     writeToStorage
 } from './js/logic/util.js';
-import {addPlayer} from "./js/logic/players.js";
+import {addPlayer, calculatePartyLevel} from "./js/logic/players.js";
 import {applyDeckSelection, loadAbilityDeck} from "./js/logic/decks.js";
 import {loadRoundCounter, resetRoundCounter} from "./js/logic/rounds.js";
-import {refreshUi} from "./ui.js";
-import {calculatePartyLevel} from "./js/logic/players.js";
+import {refreshUi, showSettingsPane} from "./ui.js";
 import {addAllPlayersToSwitchList} from "./js/logic/switches.js";
 
 //TODO Adding an extra Guard deck will reshuffle the first one,
@@ -275,14 +274,24 @@ function init() {
         let modifierDeckSection = document.getElementById("modifier-container");
         if (!showModifierDecksPage.checked) {
             modifierDeckSection.style.display = "none";
-        }
-        else {
+        } else {
             modifierDeckSection.style.display = "block";
         }
+
+        let settingspane = document.getElementById("settingspane");
+        let cancelarea = document.getElementById("cancelarea");
+
+        // assume user is ready to go, so hide the Settings menu
+        showSettingsPane(settingspane, cancelarea, false);
     };
 
     applyScenarioBtn.onclick = function () {
-        try { localStorage.clear(); } catch (e) { console.error('Local storage is required'); return; }
+        try {
+            localStorage.clear();
+        } catch (e) {
+            console.error('Local storage is required');
+            return;
+        }
         let selectedDeckNames = scenarioList.getScenarioDecks();
         writeToStorage("selectedDeckNames", JSON.stringify(selectedDeckNames));
         deckList.setSelection(selectedDeckNames);
@@ -293,11 +302,16 @@ function init() {
         let modifierDeckSection = document.getElementById("modifier-container");
         if (!showModifierCode.checked) {
             modifierDeckSection.style.display = "none";
-        }
-        else {
+        } else {
             modifierDeckSection.style.display = "block";
         }
         resetRoundCounter();
+
+        let settingspane = document.getElementById("settingspane");
+        let cancelarea = document.getElementById("cancelarea");
+
+        // assume user is ready to go, so hide the Settings menu
+        showSettingsPane(settingspane, cancelarea, false);
     };
 
     applyLoadBtn.onclick = function () {
@@ -313,10 +327,15 @@ function init() {
         let modifierDeckSection = document.getElementById("modifier-container");
         if (!showModifierCode.checked) {
             modifierDeckSection.style.display = "none";
-        }
-        else {
+        } else {
             modifierDeckSection.style.display = "block";
         }
+
+        let settingspane = document.getElementById("settingspane");
+        let cancelarea = document.getElementById("cancelarea");
+
+        // assume user is ready to go, so hide the Settings menu
+        showSettingsPane(settingspane, cancelarea, false);
     };
 
     function applyPlayers(e) {
