@@ -5,7 +5,7 @@ body {
 
     margin-top: 10px;
     font-family: Helvetica, Arial, sans-serif;
-    background: #404040;
+    background: #2f2f2f;
 }
 
 .nobr {
@@ -25,9 +25,9 @@ input[type="button"] {
     border-radius: 4px;
 }
 
-input[type="number"] {
+input:not(.playerlevelinput)[type="number"] {
     padding: 0.3em 0.6em;
-    font-size: 1.2rem;
+    font-size: 1em;
     margin: 0.6em 0;
     min-width: 20px;
 }
@@ -126,24 +126,31 @@ ul.tabcontainer .inactive {
     left: calc(-100% - 2em);
 }
 
+.playerInputLine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
 .playeridinput {
-    width: 75%;
+    flex-grow: 3;
+    min-width: 0;
 }
 
 .playeridheader {
-    width: 75%;
-    float: left;
+    flex-grow: 3;
+    min-width: 0;
 }
 
 .playerlevelinput {
-    margin-left: 5px;
-    width: 10%;
+    flex-shrink: 10;
+    min-width: 0;
 }
 
 .playerlevelheader {
-    margin-left: 9px;
-    width: 10%;
-    float: left;
+    flex-shrink: 10;
+    min-width: 0;
 }
 
 .hiddendeck {
@@ -157,7 +164,7 @@ ul.switcheslist {
     padding-left: 10px;
     overflow: hidden;
     font-family: 'PirataOne';
-    font-size: 130%;
+    font-size: 200%;
 }
 
 li.switch {

@@ -182,6 +182,7 @@
     cursor:                     pointer;
     font-family:                'PirataOne';
     font-size:                  170%;
+    color:                      white;
 }
 
 .draw-two.button

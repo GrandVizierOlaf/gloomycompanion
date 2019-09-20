@@ -1,79 +1,107 @@
 <!DOCTYPE html>
 <html manifest="app.manifest">
-    <head>
-        <title>Gloomy Companion</title>
-        <link rel="apple-touch-icon" sizes="192x192" href="images/icon.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png" />
-        <link rel="manifest" href="app.webmanifest" />
-        <link rel="stylesheet" href="css/cards.css" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="stylesheet" href="css/jsmodal.css" />
-        <link rel="stylesheet" href="css/jquery.keypad.css">
-        <meta charset="UTF-8">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <meta name="apple-mobile-web-app-title" content="Gloomy Companion" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script type="module" src="./logic.js"></script>
-        <script type="module" src="./ui.js"></script>
-        <script type="text/javascript" src="lib/jsmodal-1.0d.min.js"></script>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-        <script type="text/javascript" src="lib/jquery.plugin.min.js"></script>
-        <script type="text/javascript" src="lib/jquery.keypad.min.js"></script>
-    </head>
-    <body>
-        <div class="panecontainer">
-            <div id="settingspane" class="pane expanded">
-                <ul class="tabcontainer">
-                    <li id="playerstab">Players</li>
-                    <li id="scenariotab">Scenario</li>
-                    <li id="deckstab">Decks</li>
-                </ul>
-                <div id="playerspage" class="tabbody">
-                    <div>Enter an identifier for each player. The identifier can be a player name, character name, the character's class, or anything else you'd like.</div>
-                    <br/>
-                    <div>For any players not used, leave the box empty.</div>
-                    <br/>
-                    <div>When in-game, double-click a player's name to set its initiative.</div>
-                    <br/>
-                    <div class="playeridheader">Identifiers</div><div class="playerlevelheader">Levels</div>
-                    <form id="playerinputform">
-                        <input id="player1idinput" class="playeridinput" type="text" placeholder="Player 1 Identifier" /><input id="player1levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
-                        <input id="player2idinput" class="playeridinput" type="text" placeholder="Player 2 Identifier" /><input id="player2levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
-                        <input id="player3idinput" class="playeridinput" type="text" placeholder="Player 3 Identifier" /><input id="player3levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
-                        <input id="player4idinput" class="playeridinput" type="text" placeholder="Player 4 Identifier" /><input id="player4levelinput" type="number" min=1 max=9 step=1 class="playerlevelinput" value=1 /><br/>
-                        <input id="applyplayers" type="button" value="Apply" /><br/>
-                        <input type="submit" value="Submit" style="display: none" />
-                    </form>
-                    <input id="loadplayers" type="button" value="Load Previous Players" />
-                </div>
-                <div id="scenariospage" class="tabbody">
-                    <input id="showmodifierdeck" type="checkbox" checked /><label for="showmodifierdeck">Show Monster Modifier Deck</label>
-                    <p>
-                      <input id="applyscenario" type="button" value="Apply" />
-                      <input id="applyload" type="button" value="Load Previous Scenario" />
-                    </p>
-                </div>
-                <div id="deckspage" class="tabbody">
-                    <input id="showmodifierdeck-deckspage" type="checkbox" checked /><label for="showmodifierdeck-deckspage">Show Monster Modifier Deck</label>
-                    <br/>
-                    <input id="applydecks" type="button" value="Apply" />
-                    <br/>
-                </div>
+<head>
+    <title>Gloomy Companion</title>
+    <link rel="apple-touch-icon" sizes="192x192" href="images/icon.png"/>
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png"/>
+    <link rel="manifest" href="app.webmanifest"/>
+    <link rel="stylesheet" href="css/cards.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="css/jsmodal.css"/>
+    <link rel="stylesheet" href="css/jquery.keypad.css">
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-title" content="Gloomy Companion"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script type="module" src="./logic.js"></script>
+    <script type="module" src="./ui.js"></script>
+    <script type="text/javascript" src="lib/jsmodal-1.0d.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/jquery.plugin.min.js"></script>
+    <script type="text/javascript" src="lib/jquery.keypad.min.js"></script>
+</head>
+<body>
+<div class="panecontainer">
+    <div id="settingspane" class="pane expanded">
+        <ul class="tabcontainer">
+            <li id="playerstab">Players</li>
+            <li id="scenariotab">Scenario</li>
+            <li id="deckstab">Decks</li>
+        </ul>
+        <div id="playerspage" class="tabbody">
+            <div>Enter an identifier for each player. The identifier can be a player name, character name, the
+                character's class, or anything else you'd like.
             </div>
-            <div id="cancelarea">
+            <br/>
+            <div>For any players not used, leave the box empty.</div>
+            <br/>
+            <div>When in-game, double-click a player's name to set its initiative.</div>
+            <br/>
+            <div class="playerInputLine">
+            <div class="playeridheader">Identifiers</div>
+            <div class="playerlevelheader">Levels</div>
             </div>
+            <form id="playerinputform">
+                <div class="playerInputLine">
+                    <input id="player1idinput" class="playeridinput" type="text"
+                           placeholder="Player 1 Identifier"/>
+                    <input id="player1levelinput" type="number" min=1 max=9
+                           step=1 class="playerlevelinput" value=1/>
+                </div>
+                <div class="playerInputLine">
+                    <input id="player2idinput" class="playeridinput" type="text"
+                           placeholder="Player 2 Identifier"/>
+                    <input id="player2levelinput" type="number" min=1 max=9
+                           step=1 class="playerlevelinput" value=1/>
+                </div>
+                <div class="playerInputLine">
+                    <input id="player3idinput" class="playeridinput" type="text"
+                           placeholder="Player 3 Identifier"/>
+                    <input id="player3levelinput" type="number" min=1 max=9
+                           step=1 class="playerlevelinput" value=1/>
+                </div>
+                <div class="playerInputLine">
+                    <input id="player4idinput" class="playeridinput" type="text"
+                           placeholder="Player 4 Identifier"/>
+                    <input id="player4levelinput" type="number" min=1 max=9
+                           step=1 class="playerlevelinput" value=1/>
+                </div>
+                <input id="applyplayers" type="button" value="Apply"/><br/>
+                <input type="submit" value="Submit" style="display: none"/>
+            </form>
+            <input id="loadplayers" type="button" value="Load Previous Players"/>
         </div>
-        <div>
-            <input alt="Configure" id="settingsbtn" type="image" src="images/settings.svg" />
-            <input alt="New Round" id="newroundbtn" type="image" src="images/shuffle-black.svg" />
-            <div id="roundcounter">0</div>
-            <div id="switches">
-                <ul id="switcheslist" class="switcheslist" />
-            </div>
+        <div id="scenariospage" class="tabbody">
+            <input id="showmodifierdeck" type="checkbox" checked/><label for="showmodifierdeck">Show Monster Modifier
+            Deck</label>
+            <p>
+                <input id="applyscenario" type="button" value="Apply"/>
+                <input id="applyload" type="button" value="Load Previous Scenario"/>
+            </p>
         </div>
-        <div id="tableau" style="font-size: 26.6px;"> <!-- base font size for all cards. Placed here to make it adjustable from javascript -->
+        <div id="deckspage" class="tabbody">
+            <input id="showmodifierdeck-deckspage" type="checkbox" checked/><label for="showmodifierdeck-deckspage">Show
+            Monster Modifier Deck</label>
+            <br/>
+            <input id="applydecks" type="button" value="Apply"/>
+            <br/>
         </div>
-    </body>
+    </div>
+    <div id="cancelarea">
+    </div>
+</div>
+<div>
+    <input alt="Configure" id="settingsbtn" type="image" src="images/settings.svg"/>
+    <input alt="New Round" id="newroundbtn" type="image" src="images/shuffle-black.svg"/>
+    <div id="roundcounter">0</div>
+    <div id="switches">
+        <ul id="switcheslist" class="switcheslist"/>
+    </div>
+</div>
+<div id="tableau" style="font-size: 26.6px;">
+    <!-- base font size for all cards. Placed here to make it adjustable from javascript -->
+</div>
+</body>
 </html>
